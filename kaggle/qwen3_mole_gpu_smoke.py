@@ -11,7 +11,7 @@ import time
 from pathlib import Path
 
 
-SOURCE_ARCHIVE = Path("/kaggle/input/qwen3-mole-source/qwen3-mole.tar.gz")
+SOURCE_ROOT = Path("/kaggle/input/qwen3-mole-source")
 WORK_ROOT = Path("/kaggle/working/qwen3-mole")
 OUTPUT = Path("/kaggle/working/smoke-output")
 STATUS_PATH = OUTPUT / "status.json"
@@ -34,12 +34,13 @@ OUTPUT.mkdir(parents=True, exist_ok=True)
 status = {"steps": {}, "requested_experts": ["code", "math"], "optimizer_steps": 3}
 STATUS_PATH.write_text(json.dumps(status, indent=2) + "\n")
 
-if not SOURCE_ARCHIVE.exists():
-    raise SystemExit(f"missing source archive: {SOURCE_ARCHIVE}")
+if not (SOURCE_ROOT / "pyproject.toml").exists():
+    raise SystemExit(f"missing project source: {SOURCE_ROOT}")
 if WORK_ROOT.exists():
     shutil.rmtree(WORK_ROOT)
-WORK_ROOT.mkdir(parents=True)
-run("extract", ["tar", "-xzf", str(SOURCE_ARCHIVE), "-C", str(WORK_ROOT)])
+shutil.copytree(SOURCE_ROOT, WORK_ROOT)
+status["steps"]["copy_source"] = {"exit_code": 0, "seconds": 0.0}
+STATUS_PATH.write_text(json.dumps(status, indent=2) + "\n")
 run(
     "gpu_inventory",
     [
