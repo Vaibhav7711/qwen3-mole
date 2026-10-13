@@ -11,7 +11,7 @@ import time
 from pathlib import Path
 
 
-SOURCE_ROOT = Path("/kaggle/input/qwen3-mole-source")
+INPUT_ROOT = Path("/kaggle/input")
 WORK_ROOT = Path("/kaggle/working/qwen3-mole")
 OUTPUT = Path("/kaggle/working/smoke-output")
 STATUS_PATH = OUTPUT / "status.json"
@@ -34,11 +34,17 @@ OUTPUT.mkdir(parents=True, exist_ok=True)
 status = {"steps": {}, "requested_experts": ["code", "math"], "optimizer_steps": 3}
 STATUS_PATH.write_text(json.dumps(status, indent=2) + "\n")
 
-if not (SOURCE_ROOT / "pyproject.toml").exists():
-    raise SystemExit(f"missing project source: {SOURCE_ROOT}")
+project_files = list(INPUT_ROOT.rglob("pyproject.toml"))
+if len(project_files) != 1:
+    inventory = [str(path) for path in INPUT_ROOT.rglob("*")][:100]
+    raise SystemExit(
+        f"expected one project source below {INPUT_ROOT}, found {project_files}; inventory={inventory}"
+    )
+source_root = project_files[0].parent
+print(f"project source: {source_root}", flush=True)
 if WORK_ROOT.exists():
     shutil.rmtree(WORK_ROOT)
-shutil.copytree(SOURCE_ROOT, WORK_ROOT)
+shutil.copytree(source_root, WORK_ROOT)
 status["steps"]["copy_source"] = {"exit_code": 0, "seconds": 0.0}
 STATUS_PATH.write_text(json.dumps(status, indent=2) + "\n")
 run(
