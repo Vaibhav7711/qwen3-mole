@@ -12,3 +12,4 @@ artifacts/checkpoints/
 artifacts/router/*.joblib
 artifacts/predictions/
 wandb/
+kaggle/dataset/*.tar.gz
