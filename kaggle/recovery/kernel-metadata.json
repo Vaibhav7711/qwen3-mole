@@ -1,0 +1,18 @@
+{
+  "id": "CHANGE_ME/qwen3-mole-recovery",
+  "title": "Qwen3 MoLE Bounded Recovery",
+  "code_file": "qwen3_mole_recovery.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_tpu": false,
+  "enable_internet": true,
+  "machine_shape": "NvidiaTeslaT4",
+  "dataset_sources": [
+    "CHANGE_ME/qwen3-mole-source"
+  ],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}

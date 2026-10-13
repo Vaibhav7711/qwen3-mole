@@ -41,6 +41,7 @@ experiments, not unmeasured claims in the baseline.
 - [x] Learned top-1 router with calibrated fallback threshold
 - [x] Router metrics and confusion matrix
 - [x] Multi-LoRA vLLM serving command
+- [x] Bounded Kaggle recovery kernel with per-wave artifact preservation
 - [x] Local unit and end-to-end router smoke tests
 - [x] Kaggle dual-T4 GPU smoke run (3 optimizer steps per concurrent expert)
 - [x] Pinned, licensed four-domain ingestion and token-length filtering
@@ -157,6 +158,7 @@ whose sources and near-duplicates were excluded from training.
 configs/kaggle.yaml             experiment and hardware-safe defaults
 scripts/train_pair.sh           launch two independent experts on two GPUs
 scripts/serve_vllm.sh           tensor-parallel multi-LoRA inference
+kaggle/recovery/                 bounded recovery kernel for T4 x2
 src/qwen3_mole/data.py          schema, validation, splitting, router prompts
 src/qwen3_mole/router.py        trained top-1 router and base fallback
 src/qwen3_mole/train_expert.py  QLoRA training entry point
