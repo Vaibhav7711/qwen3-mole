@@ -13,6 +13,14 @@ class FakeTokenizer:
         return tokens
 
 
+class FakeBatchEncodingTokenizer(FakeTokenizer):
+    def apply_chat_template(self, messages, tokenize, add_generation_prompt):
+        return {
+            "input_ids": super().apply_chat_template(messages, tokenize, add_generation_prompt),
+            "attention_mask": [1] * (3 * len(messages)),
+        }
+
+
 def test_only_assistant_delta_is_labeled():
     row = tokenize_chat_with_assistant_labels(
         FakeTokenizer(),
@@ -25,6 +33,18 @@ def test_only_assistant_delta_is_labeled():
     )
     assert row["labels"] == [-100, -100, -100, -100, -100, -100, 30, 6, 2]
     assert row["attention_mask"] == [1] * 9
+
+
+def test_transformers_batch_encoding_output_is_supported():
+    row = tokenize_chat_with_assistant_labels(
+        FakeBatchEncodingTokenizer(),
+        [
+            {"role": "user", "content": "Question"},
+            {"role": "assistant", "content": "Answer"},
+        ],
+        max_length=32,
+    )
+    assert row["labels"] == [-100, -100, -100, 30, 6, 2]
 
 
 def test_collator_pads_inputs_and_masks_padding():

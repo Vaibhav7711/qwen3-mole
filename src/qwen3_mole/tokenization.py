@@ -1,6 +1,20 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import Any
+
+
+def _input_ids(rendered: Any) -> list[int]:
+    """Normalize chat-template output across Transformers versions."""
+    if isinstance(rendered, Mapping):
+        rendered = rendered["input_ids"]
+    if hasattr(rendered, "tolist"):
+        rendered = rendered.tolist()
+    if rendered and isinstance(rendered[0], list):
+        if len(rendered) != 1:
+            raise ValueError("expected one tokenized conversation")
+        rendered = rendered[0]
+    return list(rendered)
 
 
 def tokenize_chat_with_assistant_labels(
@@ -14,13 +28,13 @@ def tokenize_chat_with_assistant_labels(
 
     for message in messages:
         prefix.append(message)
-        current_tokens = tokenizer.apply_chat_template(
-            prefix,
-            tokenize=True,
-            add_generation_prompt=False,
+        current_tokens = _input_ids(
+            tokenizer.apply_chat_template(
+                prefix,
+                tokenize=True,
+                add_generation_prompt=False,
+            )
         )
-        if hasattr(current_tokens, "tolist"):
-            current_tokens = current_tokens.tolist()
         if current_tokens[: len(prior_tokens)] != prior_tokens:
             raise ValueError("chat template is not prefix-stable for assistant masking")
         new_tokens = list(current_tokens[len(prior_tokens) :])
@@ -29,7 +43,7 @@ def tokenize_chat_with_assistant_labels(
             labels.extend(new_tokens)
         else:
             labels.extend([-100] * len(new_tokens))
-        prior_tokens = list(current_tokens)
+        prior_tokens = current_tokens
 
     input_ids = input_ids[:max_length]
     labels = labels[:max_length]
