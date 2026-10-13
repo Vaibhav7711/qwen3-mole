@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+.venv/
+.DS_Store
+data/raw/
+data/smoke.jsonl
+data/processed/*.jsonl
+artifacts/adapters/
+artifacts/checkpoints/
+artifacts/router/*.joblib
+artifacts/predictions/
+wandb/
