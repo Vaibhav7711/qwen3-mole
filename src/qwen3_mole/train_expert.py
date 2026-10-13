@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from pathlib import Path
 
 from .config import load_config
@@ -20,6 +21,23 @@ def require_training_dependencies() -> None:
         raise SystemExit(
             "missing training dependencies: " + ", ".join(missing) + "; install requirements-kaggle.txt"
         )
+
+
+def compute_warmup_steps(
+    num_examples: int,
+    batch_size: int,
+    gradient_accumulation_steps: int,
+    epochs: float,
+    warmup_ratio: float,
+    max_steps: int | None,
+) -> int:
+    if max_steps is not None:
+        total_steps = max_steps
+    else:
+        batches_per_epoch = math.ceil(num_examples / batch_size)
+        updates_per_epoch = math.ceil(batches_per_epoch / gradient_accumulation_steps)
+        total_steps = math.ceil(updates_per_epoch * epochs)
+    return max(0, round(total_steps * warmup_ratio))
 
 
 def main() -> None:
@@ -77,6 +95,14 @@ def main() -> None:
 
     train_dataset = build_dataset(train_records)
     validation_dataset = build_dataset(validation_records)
+    warmup_steps = compute_warmup_steps(
+        num_examples=len(train_records),
+        batch_size=int(training["per_device_train_batch_size"]),
+        gradient_accumulation_steps=int(training["gradient_accumulation_steps"]),
+        epochs=float(training["num_train_epochs"]),
+        warmup_ratio=float(training["warmup_ratio"]),
+        max_steps=args.smoke_steps,
+    )
 
     quantization = BitsAndBytesConfig(
         load_in_4bit=True,
@@ -122,7 +148,7 @@ def main() -> None:
         output_dir=str(output_dir),
         learning_rate=float(training["learning_rate"]),
         weight_decay=float(training["weight_decay"]),
-        warmup_ratio=float(training["warmup_ratio"]),
+        warmup_steps=warmup_steps,
         num_train_epochs=float(training["num_train_epochs"]),
         per_device_train_batch_size=int(training["per_device_train_batch_size"]),
         per_device_eval_batch_size=int(training["per_device_eval_batch_size"]),
