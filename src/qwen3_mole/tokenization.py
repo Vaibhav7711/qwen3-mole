@@ -4,7 +4,7 @@ from collections.abc import Mapping
 from typing import Any
 
 
-def _input_ids(rendered: Any) -> list[int]:
+def input_ids_from_template(rendered: Any) -> list[int]:
     """Normalize chat-template output across Transformers versions."""
     if isinstance(rendered, Mapping):
         rendered = rendered["input_ids"]
@@ -28,7 +28,7 @@ def tokenize_chat_with_assistant_labels(
 
     for message in messages:
         prefix.append(message)
-        current_tokens = _input_ids(
+        current_tokens = input_ids_from_template(
             tokenizer.apply_chat_template(
                 prefix,
                 tokenize=True,

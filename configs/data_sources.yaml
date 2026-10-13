@@ -1,0 +1,49 @@
+seed: 42
+shuffle_buffer: 10000
+quality:
+  tokenizer: Qwen/Qwen3-8B
+  max_tokens: 1024
+  min_prompt_chars: 20
+  min_response_chars: 20
+  max_prompt_chars: 12000
+  max_response_chars: 20000
+
+sources:
+  - name: magicoder-evol-instruct
+    repository: ise-uiuc/Magicoder-Evol-Instruct-110K
+    revision: b0079beaa0361d82412520b873715bee59cc7dd4
+    license: apache-2.0
+    split: train
+    domain: code
+    adapter: instruction_response
+    max_records: 5000
+
+  - name: numinamath-cot
+    repository: AI-MO/NuminaMath-CoT
+    revision: 9d8d210c9f6a36c8f3cd84045668c9b7800ef517
+    license: apache-2.0
+    split: train
+    domain: math
+    adapter: messages
+    max_records: 5000
+
+  - name: devops-sft
+    repository: jalpan04/devops-sft-dataset
+    revision: bd57569ae3424607bf8a404e274429f2182f30ea
+    conversion_revision: a97fca4092d103577c4b73797923b3a837633b29
+    loader: parquet_pyarrow
+    data_file: default/train/0000.parquet
+    license: apache-2.0
+    split: train
+    domain: systems
+    adapter: messages
+    max_records: 5000
+
+  - name: ultrachat-200k
+    repository: HuggingFaceH4/ultrachat_200k
+    revision: 8049631c405ae6576f93f445c6b8166f76f5505a
+    license: mit
+    split: train_sft
+    domain: instruction
+    adapter: messages
+    max_records: 5000

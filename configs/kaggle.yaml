@@ -10,6 +10,7 @@ domains:
 data:
   train_path: data/processed/train.jsonl
   validation_path: data/processed/validation.jsonl
+  test_path: data/processed/test.jsonl
   max_length: 1024
 
 lora:

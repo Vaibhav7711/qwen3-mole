@@ -1,4 +1,8 @@
-from qwen3_mole.tokenization import CausalLMCollator, tokenize_chat_with_assistant_labels
+from qwen3_mole.tokenization import (
+    CausalLMCollator,
+    input_ids_from_template,
+    tokenize_chat_with_assistant_labels,
+)
 
 
 class FakeTokenizer:
@@ -45,6 +49,10 @@ def test_transformers_batch_encoding_output_is_supported():
         max_length=32,
     )
     assert row["labels"] == [-100, -100, -100, 30, 6, 2]
+
+
+def test_template_output_normalization_handles_one_row_batch():
+    assert input_ids_from_template({"input_ids": [[1, 2, 3]]}) == [1, 2, 3]
 
 
 def test_collator_pads_inputs_and_masks_padding():

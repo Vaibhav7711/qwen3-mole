@@ -43,13 +43,19 @@ experiments, not unmeasured claims in the baseline.
 - [x] Multi-LoRA vLLM serving command
 - [x] Local unit and end-to-end router smoke tests
 - [x] Kaggle dual-T4 GPU smoke run (3 optimizer steps per concurrent expert)
-- [ ] Curated train/evaluation datasets with contamination checks
+- [x] Pinned, licensed four-domain ingestion and token-length filtering
+- [x] Separate stratified train/validation/test outputs
+- [ ] Near-duplicate and benchmark-contamination checks
+- [ ] 256-example-per-domain real-data pilot
 - [ ] All four complete adapter runs
 - [ ] Base-vs-expert-vs-routed quality and latency benchmark
 
 The verified smoke result is documented in
 [`docs/KAGGLE_SMOKE_V5.md`](docs/KAGGLE_SMOKE_V5.md). The private Kaggle run is
 `vaibhav0383/qwen3-mole-gpu-smoke`, version 5.
+
+The source catalog and curation policy are documented in
+[`docs/DATA.md`](docs/DATA.md).
 
 ## Data contract
 
@@ -102,6 +108,14 @@ python3 -m qwen3_mole.prepare_data --input data/all.jsonl
 python3 -m qwen3_mole.train_router
 ./scripts/train_pair.sh code math
 ./scripts/train_pair.sh systems instruction
+```
+
+To build the pinned real-data mixture before those commands:
+
+```bash
+python3 -m qwen3_mole.build_data \
+  --output data/raw/curated.jsonl \
+  --manifest artifacts/data-manifest.json
 ```
 
 Each trainer loads Qwen3-8B in 4-bit NF4, computes loss only on assistant
