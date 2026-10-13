@@ -42,10 +42,14 @@ experiments, not unmeasured claims in the baseline.
 - [x] Router metrics and confusion matrix
 - [x] Multi-LoRA vLLM serving command
 - [x] Local unit and end-to-end router smoke tests
-- [ ] Kaggle GPU smoke run (10-100 optimizer steps)
+- [x] Kaggle dual-T4 GPU smoke run (3 optimizer steps per concurrent expert)
 - [ ] Curated train/evaluation datasets with contamination checks
 - [ ] All four complete adapter runs
 - [ ] Base-vs-expert-vs-routed quality and latency benchmark
+
+The verified smoke result is documented in
+[`docs/KAGGLE_SMOKE_V5.md`](docs/KAGGLE_SMOKE_V5.md). The private Kaggle run is
+`vaibhav0383/qwen3-mole-gpu-smoke`, version 5.
 
 ## Data contract
 
