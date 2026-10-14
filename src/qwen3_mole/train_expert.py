@@ -10,6 +10,29 @@ from .data import read_jsonl
 from .tokenization import CausalLMCollator, tokenize_chat_with_assistant_labels
 
 
+NO_ASSISTANT_TOKENS = "example has no assistant tokens inside max_length"
+
+
+def build_token_rows(
+    records: list[dict], tokenizer: object, max_length: int
+) -> tuple[list[dict[str, list[int]]], int]:
+    """Tokenize records, dropping only examples truncated before the answer."""
+    rows: list[dict[str, list[int]]] = []
+    skipped = 0
+    for record in records:
+        try:
+            rows.append(
+                tokenize_chat_with_assistant_labels(tokenizer, record["messages"], max_length)
+            )
+        except ValueError as error:
+            if str(error) != NO_ASSISTANT_TOKENS:
+                raise
+            skipped += 1
+    if not rows:
+        raise ValueError("all examples were truncated before assistant tokens")
+    return rows, skipped
+
+
 def require_training_dependencies() -> None:
     missing = []
     for module in ("accelerate", "bitsandbytes", "datasets", "peft", "transformers"):
@@ -86,17 +109,20 @@ def main() -> None:
         tokenizer.pad_token = tokenizer.eos_token
     max_length = int(data_config["max_length"])
 
-    def build_dataset(records: list[dict]) -> Dataset:
-        rows = [
-            tokenize_chat_with_assistant_labels(tokenizer, record["messages"], max_length)
-            for record in records
-        ]
-        return Dataset.from_list(rows)
+    def build_dataset(name: str, records: list[dict]) -> tuple[Dataset, int]:
+        rows, skipped = build_token_rows(records, tokenizer, max_length)
+        if skipped:
+            print(
+                f"{args.domain} {name}: skipped {skipped} examples with no assistant tokens "
+                f"inside max_length={max_length}",
+                flush=True,
+            )
+        return Dataset.from_list(rows), skipped
 
-    train_dataset = build_dataset(train_records)
-    validation_dataset = build_dataset(validation_records)
+    train_dataset, train_skipped = build_dataset("train", train_records)
+    validation_dataset, validation_skipped = build_dataset("validation", validation_records)
     warmup_steps = compute_warmup_steps(
-        num_examples=len(train_records),
+        num_examples=len(train_dataset),
         batch_size=int(training["per_device_train_batch_size"]),
         gradient_accumulation_steps=int(training["gradient_accumulation_steps"]),
         epochs=float(training["num_train_epochs"]),
@@ -138,8 +164,10 @@ def main() -> None:
     run_manifest = {
         "base_model": config.base_model,
         "domain": args.domain,
-        "train_examples": len(train_records),
-        "validation_examples": len(validation_records),
+        "train_examples": len(train_dataset),
+        "validation_examples": len(validation_dataset),
+        "train_examples_skipped": train_skipped,
+        "validation_examples_skipped": validation_skipped,
         "config": config.raw,
     }
     (output_dir / "run_manifest.json").write_text(json.dumps(run_manifest, indent=2, sort_keys=True) + "\n")
