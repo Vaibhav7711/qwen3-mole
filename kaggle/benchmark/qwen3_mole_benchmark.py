@@ -35,7 +35,11 @@ def run(name: str, command: list[str], cwd: Path | None = None) -> None:
 
 
 save_status()
-projects = list(INPUT_ROOT.rglob("pyproject.toml"))
+projects = [
+    path
+    for path in INPUT_ROOT.rglob("pyproject.toml")
+    if "datasets" in path.parts and "qwen3-mole-source" in path.parts
+]
 if len(projects) != 1:
     raise SystemExit(f"expected one project source, found {projects}")
 if WORK_ROOT.exists():
