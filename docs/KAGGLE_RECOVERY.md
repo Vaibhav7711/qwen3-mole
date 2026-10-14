@@ -24,4 +24,7 @@ kaggle datasets create -p kaggle/dataset
 kaggle kernels push -p kaggle/recovery
 ```
 
+The canonical kernel slug assigned by Kaggle is
+`bhabhihunter/qwen3-mole-bounded-recovery`.
+
 Do not share a Kaggle password, API token, `kaggle.json`, or browser session.

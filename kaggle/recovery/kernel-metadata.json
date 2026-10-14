@@ -1,5 +1,5 @@
 {
-  "id": "bhabhihunter/qwen3-mole-recovery",
+  "id": "bhabhihunter/qwen3-mole-bounded-recovery",
   "title": "Qwen3 MoLE Bounded Recovery",
   "code_file": "qwen3_mole_recovery.py",
   "language": "python",
