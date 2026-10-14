@@ -47,9 +47,9 @@ experiments, not unmeasured claims in the baseline.
 - [x] Kaggle dual-T4 GPU smoke run (3 optimizer steps per concurrent expert)
 - [x] Pinned, licensed four-domain ingestion and token-length filtering
 - [x] Separate stratified train/validation/test outputs
+- [x] 256-example-per-domain one-epoch real-data training run
+- [x] All four complete rank-16 adapter runs
 - [ ] Near-duplicate and benchmark-contamination checks
-- [ ] 256-example-per-domain real-data pilot
-- [ ] All four complete adapter runs
 - [ ] Base-vs-expert-vs-routed quality and latency benchmark
 
 The verified smoke result is documented in
@@ -142,6 +142,12 @@ The completed bounded real-data benchmark and its limitations are documented in
 [`docs/KAGGLE_RECOVERY_V2.md`](docs/KAGGLE_RECOVERY_V2.md). Machine-readable
 headline metrics are in
 [`benchmarks/kaggle_recovery_v2/summary.json`](benchmarks/kaggle_recovery_v2/summary.json).
+
+The completed one-epoch run is documented in
+[`docs/KAGGLE_FULL_V1.md`](docs/KAGGLE_FULL_V1.md). All four experts reached 15
+optimizer steps with improving validation loss; the router achieved 96.2% test
+accuracy on 52 held-out prompts. Machine-readable results are in
+[`benchmarks/kaggle_full_v1/summary.json`](benchmarks/kaggle_full_v1/summary.json).
 
 ## Evaluation gate
 

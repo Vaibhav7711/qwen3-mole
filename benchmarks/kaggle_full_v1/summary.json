@@ -1,0 +1,94 @@
+{
+  "kernel": "bhabhihunter/qwen3-mole-full-train",
+  "kernel_version": 1,
+  "status": "COMPLETE",
+  "base_model": "Qwen/Qwen3-8B",
+  "hardware": {
+    "gpu_count": 2,
+    "gpu_model": "NVIDIA Tesla T4",
+    "strategy": "two independent QLoRA experts trained concurrently"
+  },
+  "data": {
+    "records_per_domain": 256,
+    "total_records": 1024,
+    "train_examples": 920,
+    "validation_examples": 52,
+    "test_examples": 52,
+    "max_sequence_length": 1024
+  },
+  "training": {
+    "epochs": 1.0,
+    "optimizer_steps_per_expert": 15,
+    "microbatches_per_expert": 230,
+    "gradient_accumulation_steps": 16,
+    "trainable_parameters_per_expert": 43646976,
+    "trainable_parameter_percent": 0.5301,
+    "pipeline_stage_seconds": 1593.1,
+    "experts": {
+      "code": {
+        "usable_train_examples": 230,
+        "skipped_train_examples": 0,
+        "train_runtime_seconds": 619.4,
+        "train_loss": 1.182,
+        "validation_loss": {
+          "step_5": 1.251882553100586,
+          "step_10": 1.1699796915054321,
+          "step_15": 1.1493306159973145
+        }
+      },
+      "math": {
+        "usable_train_examples": 230,
+        "skipped_train_examples": 0,
+        "train_runtime_seconds": 658.0,
+        "train_loss": 0.7661,
+        "validation_loss": {
+          "step_5": 0.9551991820335388,
+          "step_10": 0.7588834762573242,
+          "step_15": 0.7222127318382263
+        }
+      },
+      "systems": {
+        "usable_train_examples": 230,
+        "skipped_train_examples": 0,
+        "train_runtime_seconds": 305.8,
+        "train_loss": 1.714,
+        "validation_loss": {
+          "step_5": 1.7320727109909058,
+          "step_10": 1.3613708019256592,
+          "step_15": 1.2916419506072998
+        }
+      },
+      "instruction": {
+        "usable_train_examples": 230,
+        "skipped_train_examples": 0,
+        "train_runtime_seconds": 644.8,
+        "train_loss": 1.299,
+        "validation_loss": {
+          "step_5": 1.2043131589889526,
+          "step_10": 1.0665072202682495,
+          "step_15": 1.0353150367736816
+        }
+      }
+    }
+  },
+  "router": {
+    "type": "word/bigram TF-IDF plus balanced logistic regression",
+    "confidence_threshold": 0.55,
+    "validation_accuracy": 0.9807692307692307,
+    "validation_fallback_rate": 0.23076923076923078,
+    "test_accuracy": 0.9615384615384616,
+    "test_fallback_rate": 0.23076923076923078
+  },
+  "verification": {
+    "all_stage_exit_codes_zero": true,
+    "all_four_final_adapter_configs_present": true,
+    "all_four_experts_reached_step_15": true,
+    "all_four_validation_losses_improved": true,
+    "unit_tests_passed_in_kernel": true
+  },
+  "limitations": [
+    "Loss improvement does not establish generation-quality improvement over the base model.",
+    "The held-out router partitions contain only 52 examples each.",
+    "Base, oracle-expert, routed, and wrong-expert generation comparisons remain to be run."
+  ]
+}
