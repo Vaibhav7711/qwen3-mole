@@ -165,6 +165,7 @@ configs/kaggle.yaml             experiment and hardware-safe defaults
 scripts/train_pair.sh           launch two independent experts on two GPUs
 scripts/serve_vllm.sh           tensor-parallel multi-LoRA inference
 kaggle/recovery/                 bounded recovery kernel for T4 x2
+kaggle/full/                     one-epoch real-data training kernel for T4 x2
 src/qwen3_mole/data.py          schema, validation, splitting, router prompts
 src/qwen3_mole/router.py        trained top-1 router and base fallback
 src/qwen3_mole/train_expert.py  QLoRA training entry point
