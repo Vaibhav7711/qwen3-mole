@@ -42,6 +42,7 @@ experiments, not unmeasured claims in the baseline.
 - [x] Router metrics and confusion matrix
 - [x] Multi-LoRA vLLM serving command
 - [x] Bounded Kaggle recovery kernel with per-wave artifact preservation
+- [x] Completed four-expert real-data recovery benchmark on Kaggle T4 x2
 - [x] Local unit and end-to-end router smoke tests
 - [x] Kaggle dual-T4 GPU smoke run (3 optimizer steps per concurrent expert)
 - [x] Pinned, licensed four-domain ingestion and token-length filtering
@@ -136,6 +137,11 @@ The server tensor-parallelizes one FP16 backbone across both T4s and registers
 all four adapters through vLLM's multi-LoRA support. The router's chosen expert
 name becomes the LoRA request name. The `base` fallback sends the request with
 no LoRA adapter.
+
+The completed bounded real-data benchmark and its limitations are documented in
+[`docs/KAGGLE_RECOVERY_V2.md`](docs/KAGGLE_RECOVERY_V2.md). Machine-readable
+headline metrics are in
+[`benchmarks/kaggle_recovery_v2/summary.json`](benchmarks/kaggle_recovery_v2/summary.json).
 
 ## Evaluation gate
 

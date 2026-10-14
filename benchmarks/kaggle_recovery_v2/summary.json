@@ -1,0 +1,70 @@
+{
+  "kernel": "bhabhihunter/qwen3-mole-bounded-recovery",
+  "kernel_version": 2,
+  "status": "complete",
+  "hardware": [
+    "Tesla T4 15360 MiB",
+    "Tesla T4 15360 MiB"
+  ],
+  "base_model": "Qwen/Qwen3-8B",
+  "records_per_domain": 64,
+  "total_records": 256,
+  "split": {
+    "train": 232,
+    "validation": 12,
+    "test": 12
+  },
+  "max_length": 512,
+  "optimizer_steps_per_expert": 2,
+  "trainable_parameters_per_expert": 43646976,
+  "trainable_percent": 0.5301,
+  "router": {
+    "validation_accuracy": 0.8333333333333334,
+    "validation_fallback_rate": 0.4166666666666667,
+    "test_accuracy": 0.8333333333333334,
+    "test_fallback_rate": 0.5
+  },
+  "experts": {
+    "code": {
+      "usable_train_examples": 56,
+      "skipped_train_examples": 2,
+      "train_runtime_seconds": 70.22,
+      "step_losses": [1.5357284545898438, 1.7585586309432983],
+      "validation_losses": [1.490987777709961, 1.429078459739685]
+    },
+    "math": {
+      "usable_train_examples": 58,
+      "skipped_train_examples": 0,
+      "train_runtime_seconds": 72.54,
+      "step_losses": [1.1758499145507812, 1.0770310163497925],
+      "validation_losses": [1.0133863687515259, 0.9316533207893372]
+    },
+    "systems": {
+      "usable_train_examples": 51,
+      "skipped_train_examples": 7,
+      "train_runtime_seconds": 31.87,
+      "step_losses": [2.998687744140625, 3.0103986263275146],
+      "validation_losses": [3.1942360401153564, 2.9260246753692627]
+    },
+    "instruction": {
+      "usable_train_examples": 53,
+      "skipped_train_examples": 5,
+      "train_runtime_seconds": 72.63,
+      "step_losses": [1.8623498678207397, 1.653587818145752],
+      "validation_losses": [2.0762131214141846, 1.9656249284744263]
+    }
+  },
+  "pair_wall_seconds": {
+    "code_math": 210.3,
+    "systems_instruction": 111.9
+  },
+  "pipeline_step_seconds_total": 403.5,
+  "artifacts_verified": {
+    "code": true,
+    "math": true,
+    "systems": true,
+    "instruction": true,
+    "router": true,
+    "data_manifest": true
+  }
+}
