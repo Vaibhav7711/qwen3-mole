@@ -15,11 +15,12 @@ The recovery kernel addresses that failure directly:
 - saves and evaluates at every optimizer step;
 - copies artifacts after the router and after each two-expert GPU wave.
 
-The account owner must launch the kernel themselves. Replace both `CHANGE_ME`
-values in `kaggle/recovery/kernel-metadata.json` with that account's username,
-create or attach a source dataset containing this repository, and run:
+The recovery package is configured for the collaborator account
+`bhabhihunter`. The account owner must create the source dataset and launch the
+kernel themselves while authenticated as that account:
 
 ```bash
+kaggle datasets create -p kaggle/dataset
 kaggle kernels push -p kaggle/recovery
 ```
 

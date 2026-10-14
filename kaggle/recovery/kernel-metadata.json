@@ -1,5 +1,5 @@
 {
-  "id": "CHANGE_ME/qwen3-mole-recovery",
+  "id": "bhabhihunter/qwen3-mole-recovery",
   "title": "Qwen3 MoLE Bounded Recovery",
   "code_file": "qwen3_mole_recovery.py",
   "language": "python",
@@ -10,7 +10,7 @@
   "enable_internet": true,
   "machine_shape": "NvidiaTeslaT4",
   "dataset_sources": [
-    "CHANGE_ME/qwen3-mole-source"
+    "bhabhihunter/qwen3-mole-source"
   ],
   "competition_sources": [],
   "kernel_sources": [],
