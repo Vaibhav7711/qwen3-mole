@@ -1,6 +1,6 @@
 {
   "id": "bhabhihunter/qwen3-mole-full-train",
-  "title": "Qwen3 MoLE Full Train",
+  "title": "Qwen3 MoLE Production Train",
   "code_file": "qwen3_mole_full_train.py",
   "language": "python",
   "kernel_type": "script",

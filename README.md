@@ -49,6 +49,7 @@ experiments, not unmeasured claims in the baseline.
 - [x] Separate stratified train/validation/test outputs
 - [x] 256-example-per-domain one-epoch real-data training run
 - [x] All four complete rank-16 adapter runs
+- [ ] 2,048-example-per-domain production training run
 - [ ] Near-duplicate and benchmark-contamination checks
 - [ ] Base-vs-expert-vs-routed quality and latency benchmark
 

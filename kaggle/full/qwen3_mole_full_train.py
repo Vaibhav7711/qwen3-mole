@@ -1,4 +1,4 @@
-"""One-epoch four-expert Qwen3-MoLE training on Kaggle T4 x2."""
+"""Production-scale one-epoch four-expert training on Kaggle T4 x2."""
 
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ OUTPUT.mkdir(parents=True, exist_ok=True)
 status = {
     "complete": False,
     "steps": {},
-    "records_per_domain": 256,
+    "records_per_domain": 2048,
     "max_length": 1024,
     "epochs": 1.0,
     "domains": ["code", "math", "systems", "instruction"],
@@ -110,7 +110,7 @@ run(
             "main(); sys.stdout.flush(); sys.stderr.flush(); os._exit(0)"
         ),
         "--per-source",
-        "256",
+        "2048",
         "--output",
         "data/raw/full-curated.jsonl",
         "--manifest",
