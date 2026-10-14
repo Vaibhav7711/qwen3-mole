@@ -1,6 +1,6 @@
 # Kaggle full-training v1 results
 
-Kernel: `bhabhihunter/qwen3-mole-full-train`, version 1  
+Kernel: `bhabhihunter/qwen3-mole-production-train`, version 1
 Final state: `COMPLETE`  
 Hardware: two NVIDIA Tesla T4 GPUs with one independent QLoRA process per GPU
 
