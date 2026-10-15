@@ -1,0 +1,17 @@
+{
+  "id": "bhabhihunter/qwen3-mole-data-audit",
+  "title": "Qwen3 MoLE Data Audit",
+  "code_file": "qwen3_mole_data_audit.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_tpu": false,
+  "enable_internet": true,
+  "dataset_sources": [
+    "bhabhihunter/qwen3-mole-source"
+  ],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}
