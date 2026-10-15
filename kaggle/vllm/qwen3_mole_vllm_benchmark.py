@@ -83,8 +83,24 @@ run(
 )
 run("install_vllm", [sys.executable, "-m", "pip", "install", "-q", "vllm==0.31.0"], WORK_ROOT)
 run(
-    "remove_incompatible_media_extensions",
-    [sys.executable, "-m", "pip", "uninstall", "-y", "torchaudio", "torchvision"],
+    "remove_incompatible_audio_extension",
+    [sys.executable, "-m", "pip", "uninstall", "-y", "torchaudio"],
+    WORK_ROOT,
+)
+run(
+    "install_matching_torchvision",
+    [
+        sys.executable,
+        "-m",
+        "pip",
+        "install",
+        "-q",
+        "--force-reinstall",
+        "--no-deps",
+        "--index-url",
+        "https://download.pytorch.org/whl/cu130",
+        "torchvision==0.28.0+cu130",
+    ],
     WORK_ROOT,
 )
 run(
@@ -92,7 +108,10 @@ run(
     [
         sys.executable,
         "-c",
-        "import torch; from vllm import LLM, SamplingParams; print(torch.__version__, torch.version.cuda)",
+        (
+            "import torch,torchvision; from vllm import LLM, SamplingParams; "
+            "print(torch.__version__, torch.version.cuda, torchvision.__version__)"
+        ),
     ],
     WORK_ROOT,
 )
