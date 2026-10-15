@@ -54,7 +54,7 @@ experiments, not unmeasured claims in the baseline.
 - [ ] Cluster-aware decontaminated evaluation split
 - [x] Base-vs-expert-vs-routed quality and latency benchmark
 - [ ] Independent semantic answer-quality evaluation
-- [ ] Optimized multi-LoRA serving benchmark
+- [x] Optimized AWQ multi-LoRA serving benchmark
 
 The verified smoke result is documented in
 [`docs/KAGGLE_SMOKE_V5.md`](docs/KAGGLE_SMOKE_V5.md). The private Kaggle run is
@@ -165,6 +165,16 @@ The completed leakage and common-benchmark audit is documented in
 exact cross-split duplicates and no ≥0.90 matches against HumanEval, MBPP, or
 GSM8K, but found 12 same-source test prompts with ≥0.90 train similarity. The
 result should therefore be presented as same-source held-out evaluation.
+
+The completed optimized inference benchmark is documented in
+[`docs/KAGGLE_VLLM_V3.md`](docs/KAGGLE_VLLM_V3.md). Two independent T4 vLLM
+replicas delivered 207.8 aggregate generated tokens/s for a mixed routed batch;
+sequential routed serving was 66.9% faster than the PEFT baseline. Headline
+metrics are in
+[`benchmarks/kaggle_vllm_v3/summary.json`](benchmarks/kaggle_vllm_v3/summary.json).
+
+The gated post-v0.1.0 roadmap is in
+[`docs/NEXT_STAGES.md`](docs/NEXT_STAGES.md).
 
 ## Evaluation gate
 

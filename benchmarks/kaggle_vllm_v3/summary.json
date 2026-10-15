@@ -1,0 +1,56 @@
+{
+  "kernel": "bhabhihunter/qwen3-mole-vllm-benchmark",
+  "kernel_version": 3,
+  "status": "COMPLETE",
+  "model": "Qwen/Qwen3-8B-AWQ",
+  "hardware": {
+    "gpu_count": 2,
+    "gpu_model": "NVIDIA Tesla T4",
+    "topology": "one independent vLLM replica per GPU"
+  },
+  "sample": {
+    "prompts_total": 32,
+    "prompts_per_domain": 8,
+    "max_new_tokens": 64
+  },
+  "per_replica_mean": {
+    "sequential_base_tokens_per_second": 36.08212645593265,
+    "sequential_routed_tokens_per_second": 12.229703539338759,
+    "batch_base_tokens_per_second": 366.23783343462835,
+    "batch_routed_grouped_tokens_per_second": 80.1271427613935,
+    "batch_routed_mixed_tokens_per_second": 103.90335914879359
+  },
+  "dual_replica_aggregate": {
+    "sequential_base_tokens_per_second": 72.1642529118653,
+    "sequential_routed_tokens_per_second": 24.459407078677518,
+    "batch_base_tokens_per_second": 732.4756668692567,
+    "batch_routed_grouped_tokens_per_second": 160.254285522787,
+    "batch_routed_mixed_tokens_per_second": 207.80671829758718
+  },
+  "comparisons": {
+    "peft_routed_baseline_tokens_per_second": 7.325948777609665,
+    "vllm_sequential_routed_speedup_percent": 66.93782058198557,
+    "mixed_batch_speedup_over_grouped_percent": 29.670632094543044,
+    "mixed_batch_speedup_over_sequential_factor": 8.49597533882964
+  },
+  "engine": {
+    "mean_load_and_compile_seconds": 297.84196169250003,
+    "model_memory_gib_per_gpu": 6.07,
+    "available_kv_cache_gib_per_gpu": 5.41,
+    "kv_cache_tokens_per_gpu": 39392,
+    "max_model_length": 2048
+  },
+  "verification": {
+    "all_stage_exit_codes_zero": true,
+    "both_worker_processes_completed": true,
+    "all_sample_routes_selected_expected_domain": true,
+    "mixed_multi_lora_batch_completed": true,
+    "generated_samples_retained_in_private_kaggle_output": true
+  },
+  "limitations": [
+    "The latency sample contains only 32 prompts and fixes generation at no more than 64 new tokens.",
+    "The benchmark reports aggregate generation throughput, not p50/p95 time to first token or inter-token latency.",
+    "AWQ serving quality was inspected qualitatively but was not formally compared with the NF4 evaluation path.",
+    "Engine load includes first-run graph and kernel compilation and should be separated from warm restart time in production testing."
+  ]
+}
