@@ -82,6 +82,20 @@ run(
     WORK_ROOT,
 )
 run("install_vllm", [sys.executable, "-m", "pip", "install", "-q", "vllm==0.31.0"], WORK_ROOT)
+run(
+    "remove_incompatible_media_extensions",
+    [sys.executable, "-m", "pip", "uninstall", "-y", "torchaudio", "torchvision"],
+    WORK_ROOT,
+)
+run(
+    "validate_vllm_import",
+    [
+        sys.executable,
+        "-c",
+        "import torch; from vllm import LLM, SamplingParams; print(torch.__version__, torch.version.cuda)",
+    ],
+    WORK_ROOT,
+)
 
 started = time.time()
 processes = []
