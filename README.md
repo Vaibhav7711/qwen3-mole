@@ -49,9 +49,11 @@ experiments, not unmeasured claims in the baseline.
 - [x] Separate stratified train/validation/test outputs
 - [x] 256-example-per-domain one-epoch real-data training run
 - [x] All four complete rank-16 adapter runs
-- [ ] 2,048-example-per-domain production training run
+- [x] 2,048-example-per-domain production training run
 - [ ] Near-duplicate and benchmark-contamination checks
-- [ ] Base-vs-expert-vs-routed quality and latency benchmark
+- [x] Base-vs-expert-vs-routed quality and latency benchmark
+- [ ] Independent semantic answer-quality evaluation
+- [ ] Optimized multi-LoRA serving benchmark
 
 The verified smoke result is documented in
 [`docs/KAGGLE_SMOKE_V5.md`](docs/KAGGLE_SMOKE_V5.md). The private Kaggle run is
@@ -149,6 +151,13 @@ The completed one-epoch run is documented in
 optimizer steps with improving validation loss; the router achieved 96.2% test
 accuracy on 52 held-out prompts. Machine-readable results are in
 [`benchmarks/kaggle_full_v1/summary.json`](benchmarks/kaggle_full_v1/summary.json).
+
+The production held-out benchmark is documented in
+[`docs/KAGGLE_FINAL_BENCHMARK_V2.md`](docs/KAGGLE_FINAL_BENCHMARK_V2.md). The
+routed system reduced answer NLL by 46.2% relative to base and remained within
+1.64% of oracle routing, but the PEFT serving baseline was 39.5% slower than
+base. Machine-readable results are in
+[`benchmarks/kaggle_final_v2/summary.json`](benchmarks/kaggle_final_v2/summary.json).
 
 ## Evaluation gate
 
