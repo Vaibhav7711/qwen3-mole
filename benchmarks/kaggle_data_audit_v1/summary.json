@@ -1,0 +1,50 @@
+{
+  "kernel": "bhabhihunter/qwen3-mole-data-audit",
+  "kernel_version": 1,
+  "status": "COMPLETE",
+  "counts": {
+    "train": 7376,
+    "validation": 408,
+    "test": 408
+  },
+  "exact_cross_split_matches": {
+    "validation_prompt_vs_train": 0,
+    "test_prompt_vs_train": 0,
+    "validation_full_conversation_vs_train": 0,
+    "test_full_conversation_vs_train": 0
+  },
+  "near_prompt_matches": {
+    "validation_vs_train": {
+      "similarity_gte_0_90": 6,
+      "similarity_gte_0_95": 5,
+      "similarity_gte_0_98": 5
+    },
+    "test_vs_train": {
+      "similarity_gte_0_90": 12,
+      "similarity_gte_0_95": 10,
+      "similarity_gte_0_98": 9,
+      "gte_0_90_by_domain": {
+        "systems": 11,
+        "math": 1
+      }
+    }
+  },
+  "common_benchmark_overlap": {
+    "catalogs": [
+      "HumanEval",
+      "MBPP sanitized test",
+      "GSM8K test"
+    ],
+    "similarity_gte_0_90": 0,
+    "similarity_gte_0_95": 0,
+    "similarity_gte_0_98": 0,
+    "maximum_similarity": 0.802434504032135,
+    "catalog_load_errors": []
+  },
+  "interpretation": [
+    "There is no exact normalized prompt or full-conversation leakage across the train, validation, and test partitions.",
+    "Most high-similarity cross-split pairs are systems questions that share long source context but ask different questions.",
+    "No training prompt reached 0.90 similarity to the three common benchmark catalogs, but manual review found lower-similarity transformed HumanEval and MBPP-style examples.",
+    "Cluster-aware splitting and removal of benchmark derivatives would strengthen publication-grade evaluation."
+  ]
+}

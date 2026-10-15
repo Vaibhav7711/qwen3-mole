@@ -50,7 +50,8 @@ experiments, not unmeasured claims in the baseline.
 - [x] 256-example-per-domain one-epoch real-data training run
 - [x] All four complete rank-16 adapter runs
 - [x] 2,048-example-per-domain production training run
-- [ ] Near-duplicate and benchmark-contamination checks
+- [x] Near-duplicate and benchmark-contamination audit
+- [ ] Cluster-aware decontaminated evaluation split
 - [x] Base-vs-expert-vs-routed quality and latency benchmark
 - [ ] Independent semantic answer-quality evaluation
 - [ ] Optimized multi-LoRA serving benchmark
@@ -158,6 +159,12 @@ routed system reduced answer NLL by 46.2% relative to base and remained within
 1.64% of oracle routing, but the PEFT serving baseline was 39.5% slower than
 base. Machine-readable results are in
 [`benchmarks/kaggle_final_v2/summary.json`](benchmarks/kaggle_final_v2/summary.json).
+
+The completed leakage and common-benchmark audit is documented in
+[`docs/KAGGLE_DATA_AUDIT_V1.md`](docs/KAGGLE_DATA_AUDIT_V1.md). It found no
+exact cross-split duplicates and no ≥0.90 matches against HumanEval, MBPP, or
+GSM8K, but found 12 same-source test prompts with ≥0.90 train similarity. The
+result should therefore be presented as same-source held-out evaluation.
 
 ## Evaluation gate
 
