@@ -27,7 +27,8 @@ Task scoring is domain-specific:
   using a pinned Mistral-family GPTQ model. Each routed-versus-control pair is
   judged in both answer orders; disagreements are reported as inconsistent
   rather than forced into a win. A deterministic 15-item package is retained
-  for manual review.
+  for manual review. `mole-review-agreement` refuses incomplete annotations
+  and reports exact agreement plus Cohen's kappa.
 
 The scorer reports per-condition accuracy and paired 10,000-sample bootstrap
 confidence intervals for routed minus base, oracle, and wrong-expert scores.
