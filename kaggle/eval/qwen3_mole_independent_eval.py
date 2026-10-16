@@ -125,6 +125,7 @@ if any(values.get("exact_train_overlap", 0) for values in report["stats"].values
     print("Exact overlaps were detected and excluded, as intended.", flush=True)
 
 status["verification"] = {
+    "builder_version": manifest["builder_version"],
     "records": len(records),
     "domain_counts": dict(sorted(counts.items())),
     "output_sha256": manifest["output_sha256"],

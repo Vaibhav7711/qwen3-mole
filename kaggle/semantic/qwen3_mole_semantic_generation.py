@@ -54,7 +54,11 @@ for candidate in INPUT_ROOT.rglob("status.json"):
     if value.get("complete") and value.get("records_per_domain") == 2048:
         production_statuses.append(candidate)
     if value.get("complete") and value.get("verification", {}).get("records") == 400:
-        evaluation_statuses.append(candidate)
+        manifest_path = candidate.parent / "independent-v1-manifest.json"
+        if manifest_path.exists():
+            manifest = json.loads(manifest_path.read_text())
+            if manifest.get("builder_version") == 3:
+                evaluation_statuses.append(candidate)
 if len(production_statuses) != 1:
     raise SystemExit(f"expected one production output, found {production_statuses}")
 if len(evaluation_statuses) != 1:

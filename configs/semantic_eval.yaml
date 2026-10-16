@@ -34,6 +34,13 @@ livecodebench:
   repository: https://github.com/LiveCodeBench/LiveCodeBench.git
   revision: 28fef95ea8c9f7a547c8329f2cd3d32b92c1fa24
 
+stage2_exit:
+  base_ci_lower: 0.0
+  wrong_ci_lower: 0.0
+  oracle_delta_floor: -0.05
+  domain_delta_floor: -0.05
+  judge_kappa_min: 0.60
+
 systems_judge:
   model: RedHatAI/Mistral-7B-Instruct-v0.3-quantized.w4a16
   revision: aff481973dbd56b97c6538e06556fb5e3dab939e

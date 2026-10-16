@@ -36,8 +36,14 @@ Task scoring is domain-specific:
 
 The scorer reports per-condition accuracy and paired 10,000-sample bootstrap
 confidence intervals for routed minus base, oracle, and wrong-expert scores.
-No outcome claim will be made until systems judging and the predeclared Stage 2
-exit criteria are complete.
+The final analyzer combines the three automatically scored domains with
+systems pairwise preferences on the same `[-1, 1]` difference scale. Before
+seeing results, Stage 2 is defined to pass only if routed-minus-base and
+routed-minus-wrong 95% interval lower bounds are above zero, the overall routed
+point estimate is no more than 0.05 below oracle, no domain is more than 0.05
+below base, and human/judge Cohen's kappa is at least 0.60. Invalid or
+order-inconsistent judge decisions are excluded and counted. No outcome claim
+will be made until all five gates are resolved.
 
 The private dual-T4 kernel is
 `bhabhihunter/qwen3-mole-semantic-generation`. It consumes immutable outputs
