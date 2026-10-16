@@ -12,14 +12,18 @@ The benchmark evaluates four conditions on the same frozen prompts:
 
 Generation uses the pinned `Qwen/Qwen3-8B-AWQ` revision, vLLM multi-LoRA,
 greedy decoding, Qwen thinking mode, and a 512-new-token budget in every
-condition. Two independent T4 workers each host one AWQ backbone and all four
-adapters. Conditions are grouped by selected expert so base fallbacks do not
-break mixed-LoRA batching. Outputs are checkpointed after every condition.
+non-code domain. Code receives 1,024 new tokens because complete competitive
+programming solutions are materially longer. Every condition within a domain
+uses the same budget. Two independent T4 workers each host one AWQ backbone and
+all four adapters. Conditions are grouped by selected expert and domain so
+base fallbacks do not break mixed-LoRA batching. Outputs are checkpointed after
+every condition.
 
 Task scoring is domain-specific:
 
-- HumanEval completions run in isolated, resource-limited subprocesses against
-  tests that were not included in the generation prompt;
+- LiveCodeBench v6 solutions run through its pinned official evaluator against
+  7,000 public and private tests; test payloads are never included in prompts
+  or generation files;
 - GSM8K uses normalized final-answer exact match;
 - IFEval uses Google's official strict checker pinned to the revision in
   `configs/semantic_eval.yaml`;

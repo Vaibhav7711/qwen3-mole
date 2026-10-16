@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import os
+import pickle
 import re
 import subprocess
 import sys
 import tempfile
+import zlib
 from collections import Counter, defaultdict
 from fractions import Fraction
 from pathlib import Path
@@ -75,6 +78,59 @@ def execute_humaneval(record: dict[str, Any], timeout_seconds: float = 6.0) -> d
         "passed": result.returncode == 0,
         "error": error if result.returncode else None,
     }
+
+
+def extract_solution_code(generated: str) -> str:
+    value = strip_thinking(generated).strip("\r\n")
+    fenced = FENCE.findall(value)
+    if fenced:
+        value = fenced[-1]
+    return value.strip()
+
+
+def decode_livecodebench_tests(task: dict[str, Any]) -> dict[str, Any]:
+    public_tests = json.loads(task["public_test_cases"])
+    try:
+        private_tests = json.loads(task["private_test_cases"])
+    except json.JSONDecodeError:
+        # LiveCodeBench's pinned dataset stores larger private-test lists as a
+        # base64(zlib(pickle(JSON string))) payload. The source revision and
+        # final evaluation-file hash are both fixed before this is decoded.
+        payload = base64.b64decode(task["private_test_cases"].encode("utf-8"))
+        private_tests = json.loads(pickle.loads(zlib.decompress(payload)))
+    metadata = json.loads(task["metadata"])
+    tests = public_tests + private_tests
+    if not tests:
+        raise ValueError("LiveCodeBench task has no tests")
+    return {
+        "input_output": json.dumps(
+            {
+                "inputs": [test["input"] for test in tests],
+                "outputs": [test["output"] for test in tests],
+                "fn_name": metadata.get("func_name"),
+            }
+        )
+    }
+
+
+def summarize_livecodebench_result(results: list[Any], metadata: dict[str, Any]) -> dict[str, Any]:
+    normalized = [bool(value) if isinstance(value, (bool, np.bool_)) else value for value in results]
+    passed = bool(normalized) and all(value is True for value in normalized)
+    summary = {
+        "score": float(passed),
+        "passed": passed,
+        "test_count": len(normalized),
+        "tests_passed": sum(value is True for value in normalized),
+    }
+    if not passed and isinstance(metadata, dict):
+        error = {
+            key: metadata[key]
+            for key in ("error_code", "error_message")
+            if key in metadata
+        }
+        if error:
+            summary["error"] = error
+    return summary
 
 
 def extract_final_answer(value: str) -> str | None:
@@ -165,8 +221,11 @@ def read_jsonl(path: str | Path) -> list[dict[str, Any]]:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Score code, math, and IFEval semantic generations")
     parser.add_argument("--generations", required=True)
+    parser.add_argument("--eval-data", required=True, help="frozen evaluation JSONL containing private tasks")
     parser.add_argument("--output", required=True)
     parser.add_argument("--ifeval-root", help="parent directory containing instruction_following_eval")
+    parser.add_argument("--livecodebench-root", help="parent directory containing the pinned lcb_runner package")
+    parser.add_argument("--code-processes", type=int, default=16)
     parser.add_argument("--bootstrap-samples", type=int, default=10_000)
     args = parser.parse_args()
 
@@ -179,10 +238,55 @@ def main() -> None:
         DetectorFactory.seed = 0
         evaluation_lib = loaded_evaluation_lib
 
+    specs = {record["id"]: record for record in read_jsonl(args.eval_data)}
     generations = read_jsonl(args.generations)
+    hydrated = []
+    for record in generations:
+        if record["id"] not in specs:
+            raise ValueError(f"generation references unknown evaluation id: {record['id']}")
+        spec = specs[record["id"]]
+        hydrated.append(
+            {
+                **record,
+                "prompt": spec["prompt"],
+                "reference": spec["reference"],
+                "task": spec["task"],
+                "evaluation_method": spec["evaluation_method"],
+            }
+        )
+
     scored = []
-    for index, record in enumerate(generations, start=1):
+    livecodebench_records = [
+        record
+        for record in hydrated
+        if record["domain"] == "code"
+        and record["evaluation_method"] == "livecodebench_private_execution"
+    ]
+    if livecodebench_records:
+        if not args.livecodebench_root:
+            raise ValueError("--livecodebench-root is required for LiveCodeBench scoring")
+        sys.path.insert(0, args.livecodebench_root)
+        from lcb_runner.evaluation.compute_code_generation_metrics import evaluate_generations
+
+        samples = [decode_livecodebench_tests(record["task"]) for record in livecodebench_records]
+        candidate_lists = [[extract_solution_code(record["generated"])] for record in livecodebench_records]
+        results, metadata = evaluate_generations(
+            samples,
+            candidate_lists,
+            debug=False,
+            num_process_evaluate=args.code_processes,
+            timeout=6,
+        )
+        for index, record in enumerate(livecodebench_records):
+            score = summarize_livecodebench_result(results[index][0], metadata[index][0])
+            scored.append(
+                {"id": record["id"], "domain": record["domain"], "condition": record["condition"], **score}
+            )
+
+    for index, record in enumerate(hydrated, start=1):
         if record["domain"] == "code":
+            if record["evaluation_method"] == "livecodebench_private_execution":
+                continue
             score = execute_humaneval(record)
         elif record["domain"] == "math":
             score = score_gsm8k(record)
@@ -194,7 +298,7 @@ def main() -> None:
             continue
         scored.append({"id": record["id"], "domain": record["domain"], "condition": record["condition"], **score})
         if index % 100 == 0:
-            print(f"scored {index}/{len(generations)}", flush=True)
+            print(f"scored {index}/{len(hydrated)}", flush=True)
 
     buckets: dict[str, dict[str, list[float]]] = defaultdict(lambda: defaultdict(list))
     by_key: dict[tuple[str, str], dict[str, float]] = defaultdict(dict)

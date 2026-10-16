@@ -141,6 +141,7 @@ with combined.open("w") as stream:
         stream.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
 
 ifeval_revision = "3ef52111c1fabc301880818f5a547570e926a76b"
+livecodebench_revision = "28fef95ea8c9f7a547c8329f2cd3d32b92c1fa24"
 run(
     "clone_ifeval",
     [
@@ -166,6 +167,33 @@ run(
     WORK_ROOT,
 )
 run(
+    "clone_livecodebench",
+    [
+        "git",
+        "clone",
+        "--quiet",
+        "--filter=blob:none",
+        "--no-checkout",
+        "https://github.com/LiveCodeBench/LiveCodeBench.git",
+        "livecodebench-source",
+    ],
+    WORK_ROOT,
+)
+run(
+    "checkout_livecodebench",
+    [
+        "git",
+        "-C",
+        "livecodebench-source",
+        "checkout",
+        "--quiet",
+        livecodebench_revision,
+        "--",
+        "lcb_runner/evaluation",
+    ],
+    WORK_ROOT,
+)
+run(
     "score_task_domains",
     [
         sys.executable,
@@ -173,8 +201,12 @@ run(
         "qwen3_mole.score_semantic",
         "--generations",
         str(combined),
+        "--eval-data",
+        str(eval_data),
         "--ifeval-root",
         str(WORK_ROOT / "ifeval-source"),
+        "--livecodebench-root",
+        str(WORK_ROOT / "livecodebench-source"),
         "--output",
         str(OUTPUT / "task-scores.json"),
     ],

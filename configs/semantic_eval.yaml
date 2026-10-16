@@ -5,6 +5,11 @@ model_revision: 4da05a8edb55c6046cce958586c33b61da07bb79
 thinking: true
 temperature: 0.0
 max_new_tokens: 512
+max_new_tokens_by_domain:
+  code: 1024
+  math: 512
+  systems: 512
+  instruction: 512
 max_model_len: 8192
 max_num_seqs: 8
 gpu_memory_utilization: 0.90
@@ -24,6 +29,10 @@ wrong_expert:
 ifeval:
   repository: https://github.com/google-research/google-research.git
   revision: 3ef52111c1fabc301880818f5a547570e926a76b
+
+livecodebench:
+  repository: https://github.com/LiveCodeBench/LiveCodeBench.git
+  revision: 28fef95ea8c9f7a547c8329f2cd3d32b92c1fa24
 
 systems_judge:
   model: RedHatAI/Mistral-7B-Instruct-v0.3-quantized.w4a16

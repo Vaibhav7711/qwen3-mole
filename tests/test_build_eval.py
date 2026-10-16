@@ -93,6 +93,38 @@ def test_humaneval_compares_unwrapped_source_prompt() -> None:
     assert comparison_prompt(record) == row["prompt"]
 
 
+def test_livecodebench_adapter_keeps_private_tests_out_of_prompt() -> None:
+    source = {
+        "name": "livecodebench-v6",
+        "domain": "code",
+        "kind": "livecodebench",
+        "repository": "livecodebench/code_generation_lite",
+        "revision": "abc",
+        "license": "mit",
+        "homepage": "https://github.com/LiveCodeBench/LiveCodeBench",
+        "evaluation_method": "livecodebench_private_execution",
+    }
+    row = {
+        "question_title": "Add",
+        "question_content": "Read two integers and print their sum.",
+        "platform": "atcoder",
+        "question_id": "abc_add",
+        "contest_id": "abc999",
+        "contest_date": "2025-04-01T00:00:00",
+        "starter_code": "",
+        "difficulty": "easy",
+        "public_test_cases": '[{"input":"1 2","output":"3","testtype":"stdin"}]',
+        "private_test_cases": '[{"input":"4 5","output":"9","testtype":"stdin"}]',
+        "metadata": "{}",
+    }
+    record = adapt_row(row, source)
+    assert record is not None
+    assert record["id"] == "livecodebench-v6:atcoder:abc_add"
+    assert "4 5" not in record["prompt"]
+    assert record["task"]["private_test_cases"] == row["private_test_cases"]
+    assert comparison_prompt(record) == row["question_content"]
+
+
 def test_build_suite_rejects_exact_and_near_overlap_deterministically() -> None:
     config = {
         "seed": 9,

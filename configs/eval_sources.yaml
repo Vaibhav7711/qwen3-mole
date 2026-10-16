@@ -9,7 +9,7 @@ candidate_pool_multiplier: 10
 # prompts below the general 0.90 near-duplicate threshold.
 domains:
   code:
-    max_train_similarity: 0.70
+    max_train_similarity: 0.80
   math:
     max_train_similarity: 0.80
   systems:
@@ -24,16 +24,16 @@ quality:
   max_reference_chars: 30000
 
 sources:
-  - name: humaneval
+  - name: livecodebench-v6
     domain: code
-    kind: humaneval
-    repository: openai/openai_humaneval
-    revision: 7dce6050a7d6d172f3cc5c32aa97f52fa1a2e544
-    config: openai_humaneval
-    split: test
+    kind: livecodebench
+    repository: livecodebench/code_generation_lite
+    revision: 0fe84c3912ea0c4d4a78037083943e8f0c4dd505
+    data_file: test6.jsonl
+    slice: v6
     license: mit
-    homepage: https://github.com/openai/human-eval
-    evaluation_method: execution
+    homepage: https://github.com/LiveCodeBench/LiveCodeBench
+    evaluation_method: livecodebench_private_execution
 
   - name: gsm8k
     domain: math

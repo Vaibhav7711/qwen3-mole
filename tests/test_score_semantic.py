@@ -1,4 +1,5 @@
 from qwen3_mole.score_semantic import (
+    decode_livecodebench_tests,
     execute_humaneval,
     extract_code,
     extract_final_answer,
@@ -6,6 +7,7 @@ from qwen3_mole.score_semantic import (
     paired_bootstrap,
     score_gsm8k,
     strip_thinking,
+    summarize_livecodebench_result,
 )
 
 
@@ -36,6 +38,21 @@ def test_execute_humaneval_pass_and_failure() -> None:
     assert execute_humaneval(record)["passed"] is True
     record["generated"] = "    return a - b"
     assert execute_humaneval(record)["passed"] is False
+
+
+def test_livecodebench_test_conversion_and_summary() -> None:
+    task = {
+        "public_test_cases": '[{"input":"1 2","output":"3","testtype":"stdin"}]',
+        "private_test_cases": '[{"input":"4 5","output":"9","testtype":"stdin"}]',
+        "metadata": "{}",
+    }
+    sample = decode_livecodebench_tests(task)
+    values = __import__("json").loads(sample["input_output"])
+    assert values == {"inputs": ["1 2", "4 5"], "outputs": ["3", "9"], "fn_name": None}
+    assert summarize_livecodebench_result([True, True], {})["passed"] is True
+    failed = summarize_livecodebench_result([True, -1], {"error_code": -1})
+    assert failed["passed"] is False
+    assert failed["tests_passed"] == 1
 
 
 def test_gsm8k_answer_normalization() -> None:

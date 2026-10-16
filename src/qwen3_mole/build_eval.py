@@ -19,7 +19,7 @@ from .audit_data import normalize_text
 from .data import read_jsonl
 
 
-BUILDER_VERSION = 2
+BUILDER_VERSION = 3
 BLOCK_TAGS = {
     "address",
     "blockquote",
@@ -109,7 +109,58 @@ def _provenance(source: dict[str, Any], source_id: str, source_url: str | None =
 def adapt_row(row: dict[str, Any], source: dict[str, Any]) -> dict[str, Any] | None:
     kind = source["kind"]
     domain = source["domain"]
-    if kind == "humaneval":
+    if kind == "livecodebench":
+        raw_prompt = row.get("question_content")
+        source_id = row.get("question_id")
+        platform = row.get("platform")
+        starter_code = row.get("starter_code")
+        public_tests = row.get("public_test_cases")
+        private_tests = row.get("private_test_cases")
+        metadata = row.get("metadata")
+        required_strings = (
+            raw_prompt,
+            source_id,
+            platform,
+            starter_code,
+            public_tests,
+            private_tests,
+            metadata,
+        )
+        if not all(isinstance(value, str) for value in required_strings):
+            return None
+        if not raw_prompt.strip() or not source_id.strip() or not platform.strip():
+            return None
+        source_id = f"{platform}:{source_id}"
+        try:
+            if not isinstance(json.loads(public_tests), list) or not isinstance(json.loads(metadata), dict):
+                return None
+        except json.JSONDecodeError:
+            return None
+        prompt = (
+            "Solve the following programming problem in Python 3. "
+            "Return only a complete executable solution.\n\n"
+            + raw_prompt.strip()
+        )
+        if starter_code.strip():
+            prompt += f"\n\nStarter code:\n```python\n{starter_code.strip()}\n```"
+        task = {
+            "starter_code": starter_code,
+            "public_test_cases": public_tests,
+            "private_test_cases": private_tests,
+            "metadata": metadata,
+        }
+        reference = "Scored against private executable tests; no canonical solution is exposed."
+        provenance = _provenance(source, source_id)
+        for field in ("question_title", "platform", "contest_id", "contest_date", "difficulty"):
+            value = row.get(field)
+            if isinstance(value, str):
+                provenance[field] = value
+        if isinstance(row.get("contest_id"), str):
+            provenance["group_id"] = f"contest:{platform}:{row['contest_id']}"
+        comparison_prompt = raw_prompt
+        if starter_code.strip():
+            comparison_prompt += "\n" + starter_code
+    elif kind == "humaneval":
         source_id = str(row.get("task_id", ""))
         raw_prompt = row.get("prompt")
         solution = row.get("canonical_solution")
@@ -206,7 +257,20 @@ def load_source(source: dict[str, Any]) -> list[dict[str, Any]]:
     except ImportError as exc:
         raise SystemExit("datasets is required; install the train dependencies") from exc
 
-    if source["kind"] == "stackexchange":
+    if source["kind"] == "livecodebench":
+        try:
+            from huggingface_hub import hf_hub_download
+        except ImportError as exc:
+            raise SystemExit("huggingface_hub is required for LiveCodeBench") from exc
+        path = hf_hub_download(
+            repo_id=source["repository"],
+            filename=source["data_file"],
+            repo_type="dataset",
+            revision=source["revision"],
+        )
+        with Path(path).open(encoding="utf-8") as stream:
+            rows = [json.loads(line) for line in stream if line.strip()]
+    elif source["kind"] == "stackexchange":
         try:
             import pyarrow.parquet as pq
             from huggingface_hub import hf_hub_download

@@ -119,11 +119,10 @@ def main() -> None:
         trust_remote_code=False,
         seed=int(config["seed"]),
     )
-    sampling = SamplingParams(
-        temperature=float(config["temperature"]),
-        max_tokens=int(config["max_new_tokens"]),
-        seed=int(config["seed"]),
-    )
+    token_budgets = {
+        domain: int(config.get("max_new_tokens_by_domain", {}).get(domain, config["max_new_tokens"]))
+        for domain in DOMAINS
+    }
     results: list[dict[str, Any]] = []
     condition_seconds: dict[str, float] = {}
     output_path = Path(args.output)
@@ -138,11 +137,16 @@ def main() -> None:
             )
             for record, route in zip(records, routes)
         ]
-        grouped: dict[str, list[int]] = defaultdict(list)
+        grouped: dict[tuple[str, str], list[int]] = defaultdict(list)
         for index, expert in enumerate(assignments):
-            grouped[expert].append(index)
+            grouped[(expert, records[index]["domain"])].append(index)
         decoded: dict[int, tuple[str, int, str | None]] = {}
-        for expert, indices in sorted(grouped.items()):
+        for (expert, domain), indices in sorted(grouped.items()):
+            sampling = SamplingParams(
+                temperature=float(config["temperature"]),
+                max_tokens=token_budgets[domain],
+                seed=int(config["seed"]),
+            )
             outputs = llm.generate(
                 [prompts[index] for index in indices],
                 sampling,
@@ -158,8 +162,7 @@ def main() -> None:
                 )
         for index, (record, route, expert) in enumerate(zip(records, routes, assignments)):
             text, tokens, finish_reason = decoded[index]
-            results.append(
-                {
+            result = {
                     "id": record["id"],
                     "domain": record["domain"],
                     "condition": condition,
@@ -171,14 +174,16 @@ def main() -> None:
                         "probabilities": route.probabilities,
                     },
                     "prompt": record["prompt"],
-                    "reference": record["reference"],
-                    "task": record["task"],
                     "evaluation_method": record["evaluation_method"],
                     "generated": text,
                     "generated_tokens": tokens,
                     "finish_reason": finish_reason,
                 }
-            )
+            # Systems answers need their reference in the separate judge
+            # kernel. Executable private tests never leave the frozen suite.
+            if record["domain"] == "systems":
+                result["reference"] = record["reference"]
+            results.append(result)
         condition_seconds[condition] = time.perf_counter() - condition_started
         write_jsonl(output_path, results)
         print(f"completed {condition}: {len(records)} answers", flush=True)
@@ -189,6 +194,7 @@ def main() -> None:
         "thinking": config["thinking"],
         "temperature": config["temperature"],
         "max_new_tokens": config["max_new_tokens"],
+        "max_new_tokens_by_domain": token_budgets,
         "records": len(records),
         "answers": len(results),
         "domains": dict(sorted(Counter(record["domain"] for record in records).items())),
