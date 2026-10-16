@@ -1,0 +1,21 @@
+{
+  "id": "bhabhihunter/qwen3-mole-semantic-generation",
+  "title": "Qwen3 MoLE Semantic Generation",
+  "code_file": "qwen3_mole_semantic_generation.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_tpu": false,
+  "enable_internet": true,
+  "machine_shape": "NvidiaTeslaT4",
+  "dataset_sources": [
+    "bhabhihunter/qwen3-mole-source"
+  ],
+  "competition_sources": [],
+  "kernel_sources": [
+    "bhabhihunter/qwen3-mole-production-train",
+    "bhabhihunter/qwen3-mole-independent-evaluation-set"
+  ],
+  "model_sources": []
+}

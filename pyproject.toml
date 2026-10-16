@@ -30,6 +30,8 @@ test = ["pytest>=8.0"]
 mole-prepare-data = "qwen3_mole.prepare_data:main"
 mole-build-data = "qwen3_mole.build_data:main"
 mole-build-eval = "qwen3_mole.build_eval:main"
+mole-generate-semantic = "qwen3_mole.generate_semantic:main"
+mole-score-semantic = "qwen3_mole.score_semantic:main"
 mole-train-router = "qwen3_mole.train_router:main"
 mole-route = "qwen3_mole.route_prompts:main"
 mole-train-expert = "qwen3_mole.train_expert:main"

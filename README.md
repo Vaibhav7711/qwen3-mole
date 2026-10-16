@@ -180,6 +180,9 @@ The independent 400-prompt evaluation builder and its stricter benchmark-
 derivative filters are documented in
 [`docs/INDEPENDENT_EVAL_V1.md`](docs/INDEPENDENT_EVAL_V1.md).
 
+The gated four-condition semantic generation and task-scoring harness is
+documented in [`docs/SEMANTIC_EVAL_V1.md`](docs/SEMANTIC_EVAL_V1.md).
+
 ## Evaluation gate
 
 We do not call the experiment successful merely because loss falls. The final

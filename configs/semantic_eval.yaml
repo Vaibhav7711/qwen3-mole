@@ -1,0 +1,31 @@
+version: 1
+seed: 20261016
+model: Qwen/Qwen3-8B-AWQ
+model_revision: 4da05a8edb55c6046cce958586c33b61da07bb79
+thinking: true
+temperature: 0.0
+max_new_tokens: 512
+max_model_len: 8192
+max_num_seqs: 8
+gpu_memory_utilization: 0.90
+
+conditions:
+  - base
+  - oracle
+  - routed
+  - wrong
+
+wrong_expert:
+  code: math
+  math: systems
+  systems: instruction
+  instruction: code
+
+ifeval:
+  repository: https://github.com/google-research/google-research.git
+  revision: 3ef52111c1fabc301880818f5a547570e926a76b
+
+systems_judge:
+  model: mistralai/Mistral-7B-Instruct-v0.3
+  revision: c170c708c41dac9275d15a8fff4eca08d52bab71
+  license: apache-2.0
