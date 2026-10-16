@@ -55,8 +55,8 @@ def judge_prompt(
 
 
 def parse_decision(value: str) -> str:
-    match = DECISION.search(value.strip())
-    return match.group(1).upper() if match else "INVALID"
+    matches = DECISION.findall(value.strip())
+    return matches[-1].upper() if matches else "INVALID"
 
 
 def map_decision(decision: str, answer_a: str, answer_b: str) -> str:
@@ -133,6 +133,37 @@ def summarize_judgments(results: list[dict[str, Any]], seed: int) -> dict[str, A
             "routed_preference_minus_chance": interval,
         }
     return summary
+
+
+def select_manual_review(
+    results: list[dict[str, Any]],
+    comparison_data: dict[str, dict[str, Any]],
+    target: int = 15,
+) -> list[dict[str, Any]]:
+    """Deterministically sample across control and judge-outcome strata."""
+    groups: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
+    for result in results:
+        rank = hashlib.sha256(f"review:{result['comparison_id']}".encode()).hexdigest()
+        groups[(result["other"], result["winner"])].append(
+            {
+                "review_rank": rank,
+                **comparison_data[result["comparison_id"]],
+                "judgment": result,
+            }
+        )
+    for values in groups.values():
+        values.sort(key=lambda value: value["review_rank"])
+    sample = []
+    group_keys = sorted(groups)
+    while len(sample) < target:
+        added = False
+        for key in group_keys:
+            if groups[key] and len(sample) < target:
+                sample.append(groups[key].pop(0))
+                added = True
+        if not added:
+            break
+    return sample
 
 
 def main() -> None:

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 import shutil
@@ -104,7 +103,7 @@ save()
 if any(exit_codes.values()):
     raise SystemExit(max(exit_codes.values()))
 
-from qwen3_mole.judge_systems import load_comparisons, summarize_judgments
+from qwen3_mole.judge_systems import load_comparisons, select_manual_review, summarize_judgments
 
 judgments = []
 for path in sorted(OUTPUT.glob("judge-shard-*.json")):
@@ -119,12 +118,8 @@ summary = summarize_judgments(judgments, 20261016)
 comparison_data = {
     item["comparison_id"]: item for item in load_comparisons(generations, 20261016)
 }
-review = []
-for judgment in judgments:
-    rank = hashlib.sha256(f"review:{judgment['comparison_id']}".encode()).hexdigest()
-    review.append({"review_rank": rank, **comparison_data[judgment["comparison_id"]], "judgment": judgment})
-review.sort(key=lambda value: value["review_rank"])
-(OUTPUT / "manual-review-sample.json").write_text(json.dumps(review[:15], indent=2, sort_keys=True) + "\n")
+review = select_manual_review(judgments, comparison_data, target=15)
+(OUTPUT / "manual-review-sample.json").write_text(json.dumps(review, indent=2, sort_keys=True) + "\n")
 status["verification"] = {
     "comparisons": len(judgments),
     "judge_passes": sum(len(value["passes"]) for value in judgments),
