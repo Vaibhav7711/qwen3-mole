@@ -27,6 +27,7 @@ def test_strip_thinking_and_extract_code() -> None:
     generated = "<think>private reasoning</think>\n```python\ndef add(a, b):\n    return a + b\n```"
     assert "private" not in strip_thinking(generated)
     assert extract_code(generated, "def add(a, b):\n", "add").startswith("def add")
+    assert strip_thinking("<think>unfinished private reasoning") == ""
 
 
 def test_execute_humaneval_pass_and_failure() -> None:

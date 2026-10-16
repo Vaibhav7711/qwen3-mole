@@ -10,14 +10,21 @@ The benchmark evaluates four conditions on the same frozen prompts:
 3. the TF-IDF router-selected LoRA or base fallback;
 4. a fixed wrong-domain LoRA control.
 
-Generation uses the pinned `Qwen/Qwen3-8B-AWQ` revision, vLLM multi-LoRA,
-greedy decoding, Qwen thinking mode, and a 512-new-token budget in every
-non-code domain. Code receives 1,024 new tokens because complete competitive
-programming solutions are materially longer. Every condition within a domain
-uses the same budget. Two independent T4 workers each host one AWQ backbone and
-all four adapters. Conditions are grouped by selected expert and domain so
-base fallbacks do not break mixed-LoRA batching. Outputs are checkpointed after
-every condition.
+Generation uses the pinned `Qwen/Qwen3-8B-AWQ` revision, vLLM multi-LoRA, and
+greedy decoding. Code and math use Qwen thinking mode with 4,096 new tokens;
+systems and instruction following use direct non-thinking mode with 768 and
+512 tokens respectively. Every condition within a domain uses the same mode
+and budget. Two independent T4 workers each host one AWQ backbone and all four
+adapters; code runs on one worker while math, systems, and instruction run on
+the other to balance the longer reasoning workloads. Conditions are grouped by
+selected expert and domain so base fallbacks do not break mixed-LoRA batching.
+Outputs are checkpointed after every condition.
+
+The first semantic execution used thinking mode for all domains with only 512
+tokens outside code and 1,024 for code. It was rejected before systems judging:
+96% of base code, 100% of base math, and 100% of base systems generations hit
+the length ceiling, often before emitting a user-visible answer. The corrected
+protocol above was fixed before examining final systems outcomes.
 
 Task scoring is domain-specific:
 

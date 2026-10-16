@@ -90,7 +90,9 @@ def main() -> None:
             [{"role": "user", "content": record["prompt"]}],
             tokenize=False,
             add_generation_prompt=True,
-            enable_thinking=bool(config["thinking"]),
+            enable_thinking=bool(
+                config.get("thinking_by_domain", {}).get(record["domain"], config["thinking"])
+            ),
         )
         for record in records
     ]
@@ -121,6 +123,10 @@ def main() -> None:
     )
     token_budgets = {
         domain: int(config.get("max_new_tokens_by_domain", {}).get(domain, config["max_new_tokens"]))
+        for domain in DOMAINS
+    }
+    thinking_modes = {
+        domain: bool(config.get("thinking_by_domain", {}).get(domain, config["thinking"]))
         for domain in DOMAINS
     }
     results: list[dict[str, Any]] = []
@@ -192,6 +198,7 @@ def main() -> None:
         "model": config["model"],
         "model_revision": config["model_revision"],
         "thinking": config["thinking"],
+        "thinking_by_domain": thinking_modes,
         "temperature": config["temperature"],
         "max_new_tokens": config["max_new_tokens"],
         "max_new_tokens_by_domain": token_budgets,

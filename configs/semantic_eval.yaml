@@ -3,12 +3,17 @@ seed: 20261016
 model: Qwen/Qwen3-8B-AWQ
 model_revision: 4da05a8edb55c6046cce958586c33b61da07bb79
 thinking: true
+thinking_by_domain:
+  code: true
+  math: true
+  systems: false
+  instruction: false
 temperature: 0.0
 max_new_tokens: 512
 max_new_tokens_by_domain:
-  code: 1024
-  math: 512
-  systems: 512
+  code: 4096
+  math: 4096
+  systems: 768
   instruction: 512
 max_model_len: 8192
 max_num_seqs: 8

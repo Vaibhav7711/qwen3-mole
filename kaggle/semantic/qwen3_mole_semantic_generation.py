@@ -103,7 +103,7 @@ run(
 
 started = time.time()
 processes = []
-for gpu, domains in enumerate((("code", "math"), ("systems", "instruction"))):
+for gpu, domains in enumerate((("code",), ("math", "systems", "instruction"))):
     environment = os.environ.copy()
     environment["CUDA_VISIBLE_DEVICES"] = str(gpu)
     worker_output = OUTPUT / f"generations-{'-'.join(domains)}.jsonl"

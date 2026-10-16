@@ -19,17 +19,18 @@ import numpy as np
 
 
 THINKING = re.compile(r"<think>.*?</think>", flags=re.DOTALL | re.IGNORECASE)
+UNFINISHED_THINKING = re.compile(r"<think>.*$", flags=re.DOTALL | re.IGNORECASE)
 FENCE = re.compile(r"```(?:python)?\s*\n?(.*?)```", flags=re.DOTALL | re.IGNORECASE)
 BOXED = re.compile(r"\\boxed\{([^{}]+)\}")
 NUMBER = re.compile(r"[-+]?\$?[0-9][0-9,]*(?:\.[0-9]+)?(?:/[0-9][0-9,]*)?%?")
 
 
 def strip_thinking(value: str) -> str:
-    return THINKING.sub("", value).strip()
+    return UNFINISHED_THINKING.sub("", THINKING.sub("", value)).strip()
 
 
 def extract_code(generated: str, starter_code: str, entry_point: str) -> str:
-    value = THINKING.sub("", generated).strip("\r\n")
+    value = UNFINISHED_THINKING.sub("", THINKING.sub("", generated)).strip("\r\n")
     fenced = FENCE.findall(value)
     if fenced:
         value = next((block for block in fenced if f"def {entry_point}" in block), fenced[0])
