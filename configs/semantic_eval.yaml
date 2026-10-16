@@ -26,6 +26,10 @@ ifeval:
   revision: 3ef52111c1fabc301880818f5a547570e926a76b
 
 systems_judge:
-  model: mistralai/Mistral-7B-Instruct-v0.3
-  revision: c170c708c41dac9275d15a8fff4eca08d52bab71
+  model: RedHatAI/Mistral-7B-Instruct-v0.3-quantized.w4a16
+  revision: aff481973dbd56b97c6538e06556fb5e3dab939e
   license: apache-2.0
+  quantization: gptq
+  max_model_len: 8192
+  max_num_seqs: 8
+  max_new_tokens: 8

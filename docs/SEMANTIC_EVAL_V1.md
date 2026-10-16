@@ -23,8 +23,11 @@ Task scoring is domain-specific:
 - GSM8K uses normalized final-answer exact match;
 - IFEval uses Google's official strict checker pinned to the revision in
   `configs/semantic_eval.yaml`;
-- Server Fault responses are retained for a separate blinded pairwise judge
-  pass using a pinned Mistral-family model, followed by manual review.
+- Server Fault responses go through a separate blinded pairwise judge pass
+  using a pinned Mistral-family GPTQ model. Each routed-versus-control pair is
+  judged in both answer orders; disagreements are reported as inconsistent
+  rather than forced into a win. A deterministic 15-item package is retained
+  for manual review.
 
 The scorer reports per-condition accuracy and paired 10,000-sample bootstrap
 confidence intervals for routed minus base, oracle, and wrong-expert scores.
@@ -34,3 +37,4 @@ exit criteria are complete.
 The private dual-T4 kernel is
 `bhabhihunter/qwen3-mole-semantic-generation`. It consumes immutable outputs
 from the production training and independent evaluation kernels.
+The dependent judge kernel is `bhabhihunter/qwen3-mole-systems-judge`.
