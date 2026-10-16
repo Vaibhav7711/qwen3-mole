@@ -40,7 +40,7 @@ def test_load_comparisons_blinds_all_three_controls(tmp_path: Path) -> None:
                         "condition": condition,
                         "prompt": "How?",
                         "reference": "Reference",
-                        "generated": f"{condition} answer",
+                        "generated": f"<think>hidden</think>{condition} answer",
                     }
                 )
                 + "\n"
@@ -48,6 +48,7 @@ def test_load_comparisons_blinds_all_three_controls(tmp_path: Path) -> None:
     comparisons = load_comparisons(path, 42)
     assert [value["other"] for value in comparisons] == ["base", "oracle", "wrong"]
     assert all(len(value["orders"]) == 2 for value in comparisons)
+    assert all("hidden" not in " ".join(value["answers"].values()) for value in comparisons)
     assert stable_reverse("serverfault:7", "base", 42) == stable_reverse("serverfault:7", "base", 42)
 
 

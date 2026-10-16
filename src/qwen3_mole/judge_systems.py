@@ -10,7 +10,7 @@ from typing import Any
 
 import yaml
 
-from .score_semantic import paired_bootstrap
+from .score_semantic import paired_bootstrap, strip_thinking
 
 
 OTHER_CONDITIONS = ("base", "oracle", "wrong")
@@ -94,8 +94,8 @@ def load_comparisons(path: str | Path, seed: int) -> list[dict[str, Any]]:
             reverse = stable_reverse(identifier, other, seed)
             order = [other, "routed"] if reverse else ["routed", other]
             answers = {
-                "routed": routed["generated"],
-                other: other_record["generated"],
+                "routed": strip_thinking(routed["generated"]),
+                other: strip_thinking(other_record["generated"]),
             }
             comparisons.append(
                 {
