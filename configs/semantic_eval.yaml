@@ -9,14 +9,27 @@ thinking_by_domain:
   systems: false
   instruction: false
 temperature: 0.0
+sampling_by_mode:
+  thinking:
+    temperature: 0.6
+    top_p: 0.95
+    top_k: 20
+    min_p: 0.0
+    presence_penalty: 1.5
+  non_thinking:
+    temperature: 0.7
+    top_p: 0.8
+    top_k: 20
+    min_p: 0.0
+    presence_penalty: 1.5
 max_new_tokens: 512
 max_new_tokens_by_domain:
-  code: 4096
-  math: 4096
-  systems: 768
-  instruction: 512
-max_model_len: 8192
-max_num_seqs: 8
+  code: 8192
+  math: 8192
+  systems: 2048
+  instruction: 1024
+max_model_len: 12288
+max_num_seqs: 4
 gpu_memory_utilization: 0.90
 
 conditions:

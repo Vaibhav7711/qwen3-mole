@@ -148,8 +148,14 @@ def main() -> None:
             grouped[(expert, records[index]["domain"])].append(index)
         decoded: dict[int, tuple[str, int, str | None]] = {}
         for (expert, domain), indices in sorted(grouped.items()):
+            mode = "thinking" if thinking_modes[domain] else "non_thinking"
+            sampling_config = config.get("sampling_by_mode", {}).get(mode, {})
             sampling = SamplingParams(
-                temperature=float(config["temperature"]),
+                temperature=float(sampling_config.get("temperature", config["temperature"])),
+                top_p=float(sampling_config.get("top_p", 1.0)),
+                top_k=int(sampling_config.get("top_k", -1)),
+                min_p=float(sampling_config.get("min_p", 0.0)),
+                presence_penalty=float(sampling_config.get("presence_penalty", 0.0)),
                 max_tokens=token_budgets[domain],
                 seed=int(config["seed"]),
             )
@@ -200,6 +206,7 @@ def main() -> None:
         "thinking": config["thinking"],
         "thinking_by_domain": thinking_modes,
         "temperature": config["temperature"],
+        "sampling_by_mode": config.get("sampling_by_mode", {}),
         "max_new_tokens": config["max_new_tokens"],
         "max_new_tokens_by_domain": token_budgets,
         "records": len(records),
