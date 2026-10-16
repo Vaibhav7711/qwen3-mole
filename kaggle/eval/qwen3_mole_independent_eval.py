@@ -105,6 +105,8 @@ run(
 manifest = json.loads((OUTPUT / "independent-v1-manifest.json").read_text())
 report = json.loads((OUTPUT / "independent-v1-decontamination.json").read_text())
 records = [json.loads(line) for line in (OUTPUT / "independent-v1.jsonl").read_text().splitlines() if line]
+if manifest.get("builder_version") != 2 or report.get("builder_version") != 2:
+    raise SystemExit("expected corrected evaluation builder version 2")
 counts = Counter(record["domain"] for record in records)
 expected = {"code": 100, "math": 100, "systems": 100, "instruction": 100}
 if dict(counts) != expected:
