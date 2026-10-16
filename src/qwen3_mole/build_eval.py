@@ -125,6 +125,7 @@ def adapt_row(row: dict[str, Any], source: dict[str, Any]) -> dict[str, Any] | N
         }
         reference = raw_prompt + solution
         provenance = _provenance(source, source_id)
+        comparison_prompt = raw_prompt
     elif kind == "gsm8k":
         raw_prompt = row.get("question")
         reference = row.get("answer")
@@ -137,6 +138,7 @@ def adapt_row(row: dict[str, Any], source: dict[str, Any]) -> dict[str, Any] | N
             return None
         task = {"final_answer": match.group(1).strip()}
         provenance = _provenance(source, source_id)
+        comparison_prompt = prompt
     elif kind == "stackexchange":
         question = row.get("question")
         answers = row.get("answers")
@@ -165,6 +167,7 @@ def adapt_row(row: dict[str, Any], source: dict[str, Any]) -> dict[str, Any] | N
         provenance = _provenance(source, source_id, source_url)
         provenance["answer_author"] = chosen.get("author")
         provenance["group_id"] = f"serverfault:{qid}"
+        comparison_prompt = prompt
     elif kind == "ifeval":
         raw_prompt = row.get("prompt")
         key = row.get("key")
@@ -177,6 +180,7 @@ def adapt_row(row: dict[str, Any], source: dict[str, Any]) -> dict[str, Any] | N
         source_id = str(key)
         task = {"instruction_id_list": instruction_ids, "kwargs": kwargs}
         provenance = _provenance(source, source_id)
+        comparison_prompt = prompt
     else:
         raise ValueError(f"unknown evaluation source kind: {kind}")
 
@@ -190,6 +194,9 @@ def adapt_row(row: dict[str, Any], source: dict[str, Any]) -> dict[str, Any] | N
         "provenance": provenance,
     }
     record["content_sha256"] = sha256_text(canonical_json(record))
+    # This internal field is used only by the decontamination scan and is
+    # removed before writing the frozen evaluation file.
+    record["_comparison_prompt"] = comparison_prompt
     return record
 
 
@@ -261,6 +268,10 @@ def stable_rank(record: dict[str, Any], seed: int) -> str:
     return sha256_text(f"{seed}:{record['id']}:{record['content_sha256']}")
 
 
+def comparison_prompt(record: dict[str, Any]) -> str:
+    return str(record.get("_comparison_prompt", record["prompt"]))
+
+
 def training_query_text(record: dict[str, Any]) -> str:
     """Return pre-answer content without role labels for contamination checks."""
     parts = []
@@ -289,7 +300,7 @@ def build_suite(
         if reason:
             stats[domain][reason] += 1
             continue
-        normalized = normalize_text(record["prompt"])
+        normalized = normalize_text(comparison_prompt(record))
         if normalized in seen_eval:
             stats[domain]["duplicate_eval_prompt"] += 1
             continue
@@ -310,7 +321,7 @@ def build_suite(
     candidates = pooled
 
     similarities, nearest_indices = nearest_train_similarities(
-        train_prompts, [record["prompt"] for record in candidates]
+        train_prompts, [comparison_prompt(record) for record in candidates]
     )
     retained: dict[str, list[dict[str, Any]]] = {domain: [] for domain in config["domains"]}
     review: list[dict[str, Any]] = []
@@ -330,7 +341,7 @@ def build_suite(
                     "decision": decision,
                     "threshold": threshold,
                     "similarity": round(float(similarity), 8),
-                    "evaluation_prompt": record["prompt"][:500],
+                    "evaluation_prompt": comparison_prompt(record)[:500],
                     "nearest_train_index": int(train_index),
                     "nearest_train_prompt": train_prompts[int(train_index)][:500],
                 }
@@ -343,7 +354,10 @@ def build_suite(
         ranked = sorted(retained[domain], key=lambda record: stable_rank(record, seed))
         if len(ranked) < target:
             raise RuntimeError(f"{domain} retained {len(ranked)} clean records; {target} required")
-        selected.extend(ranked[:target])
+        selected.extend(
+            {key: value for key, value in record.items() if not key.startswith("_")}
+            for record in ranked[:target]
+        )
         stats[domain]["selected"] = target
     selected.sort(key=lambda record: (record["domain"], stable_rank(record, seed)))
     report = {

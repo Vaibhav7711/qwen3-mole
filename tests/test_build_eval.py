@@ -1,6 +1,13 @@
 from __future__ import annotations
 
-from qwen3_mole.build_eval import adapt_row, build_suite, canonical_json, html_to_text, stable_rank
+from qwen3_mole.build_eval import (
+    adapt_row,
+    build_suite,
+    canonical_json,
+    comparison_prompt,
+    html_to_text,
+    stable_rank,
+)
 
 
 def train_record(domain: str, prompt: str) -> dict:
@@ -60,6 +67,30 @@ def test_stackexchange_adapter_selects_accepted_answer() -> None:
     assert record["reference"] == "Accepted answer."
     assert record["task"]["answer_id"] == 2
     assert record["provenance"]["source_url"].endswith("/example")
+
+
+def test_humaneval_compares_unwrapped_source_prompt() -> None:
+    source = {
+        "name": "humaneval",
+        "domain": "code",
+        "kind": "humaneval",
+        "repository": "openai/openai_humaneval",
+        "revision": "abc",
+        "license": "mit",
+        "homepage": "https://example.com",
+        "evaluation_method": "execution",
+    }
+    row = {
+        "task_id": "HumanEval/0",
+        "prompt": "def identity(value):\n    pass\n",
+        "canonical_solution": "    return value\n",
+        "test": "def check(candidate): assert candidate(1) == 1",
+        "entry_point": "identity",
+    }
+    record = adapt_row(row, source)
+    assert record is not None
+    assert record["prompt"].startswith("Complete the following")
+    assert comparison_prompt(record) == row["prompt"]
 
 
 def test_build_suite_rejects_exact_and_near_overlap_deterministically() -> None:
