@@ -161,6 +161,11 @@ run(
     WORK_ROOT,
 )
 run(
+    "download_ifeval_nltk_data",
+    [sys.executable, "-m", "nltk.downloader", "punkt", "punkt_tab"],
+    WORK_ROOT,
+)
+run(
     "score_task_domains",
     [
         sys.executable,

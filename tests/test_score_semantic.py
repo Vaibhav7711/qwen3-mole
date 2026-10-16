@@ -9,6 +9,18 @@ from qwen3_mole.score_semantic import (
 )
 
 
+class FakeIFEval:
+    class InputExample:
+        def __init__(self, **kwargs):
+            self.kwargs = kwargs["kwargs"]
+
+    @staticmethod
+    def test_instruction_following_strict(value, prompt_to_response):
+        assert value.kwargs == [{"num_words": 20}]
+        assert prompt_to_response == {"Prompt": "Answer"}
+        return type("Output", (), {"follow_all_instructions": True, "follow_instruction_list": [True]})()
+
+
 def test_strip_thinking_and_extract_code() -> None:
     generated = "<think>private reasoning</think>\n```python\ndef add(a, b):\n    return a + b\n```"
     assert "private" not in strip_thinking(generated)
@@ -39,3 +51,18 @@ def test_paired_bootstrap_reports_direction() -> None:
     assert result["mean_delta"] == 0.5
     assert result["wins"] == 2
     assert result["losses"] == 0
+
+
+def test_ifeval_removes_arrow_null_kwargs() -> None:
+    from qwen3_mole.score_semantic import score_ifeval
+
+    record = {
+        "id": "ifeval:1000",
+        "prompt": "Prompt",
+        "generated": "Answer",
+        "task": {
+            "instruction_id_list": ["length_constraints:number_words"],
+            "kwargs": [{"num_words": 20, "language": None}],
+        },
+    }
+    assert score_ifeval(record, FakeIFEval)["passed"] is True

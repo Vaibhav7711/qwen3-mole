@@ -121,7 +121,12 @@ def score_ifeval(record: dict[str, Any], evaluation_lib: Any) -> dict[str, Any]:
         key=int(source_id),
         instruction_id_list=task["instruction_id_list"],
         prompt=record["prompt"],
-        kwargs=task["kwargs"],
+        # Arrow materializes the union of every IFEval kwargs field for each
+        # instruction. Google's native JSONL contains only applicable keys.
+        kwargs=[
+            {key: value for key, value in item.items() if value is not None}
+            for item in task["kwargs"]
+        ],
     )
     output = evaluation_lib.test_instruction_following_strict(
         value, {record["prompt"]: strip_thinking(record["generated"])}
@@ -168,8 +173,10 @@ def main() -> None:
     evaluation_lib = None
     if args.ifeval_root:
         sys.path.insert(0, args.ifeval_root)
+        from langdetect import DetectorFactory
         from instruction_following_eval import evaluation_lib as loaded_evaluation_lib
 
+        DetectorFactory.seed = 0
         evaluation_lib = loaded_evaluation_lib
 
     generations = read_jsonl(args.generations)
