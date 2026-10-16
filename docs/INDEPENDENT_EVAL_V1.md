@@ -25,6 +25,9 @@ are always removed. The general exclusion threshold is 0.90. HumanEval uses a
 stricter 0.70 threshold and GSM8K uses 0.80 because the earlier audit found
 transformed benchmark-like training prompts below 0.90.
 
+Builder version 2 compares HumanEval's original function prompt before adding
+the generation instruction, preventing that wrapper from diluting similarity.
+
 Candidates are deterministically ranked from their identifier, content hash,
 and seed. Up to 10 times the target count per domain enters the similarity
 scan, and the first 100 clean candidates are frozen. The generated prompts and

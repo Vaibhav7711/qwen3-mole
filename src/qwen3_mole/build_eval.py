@@ -19,7 +19,7 @@ from .audit_data import normalize_text
 from .data import read_jsonl
 
 
-BUILDER_VERSION = 1
+BUILDER_VERSION = 2
 BLOCK_TAGS = {
     "address",
     "blockquote",
