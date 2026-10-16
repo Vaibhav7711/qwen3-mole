@@ -51,7 +51,7 @@ experiments, not unmeasured claims in the baseline.
 - [x] All four complete rank-16 adapter runs
 - [x] 2,048-example-per-domain production training run
 - [x] Near-duplicate and benchmark-contamination audit
-- [ ] Cluster-aware decontaminated evaluation split
+- [ ] Independent decontaminated evaluation suite (build running)
 - [x] Base-vs-expert-vs-routed quality and latency benchmark
 - [ ] Independent semantic answer-quality evaluation
 - [x] Optimized AWQ multi-LoRA serving benchmark
@@ -175,6 +175,10 @@ metrics are in
 
 The gated post-v0.1.0 roadmap is in
 [`docs/NEXT_STAGES.md`](docs/NEXT_STAGES.md).
+
+The independent 400-prompt evaluation builder and its stricter benchmark-
+derivative filters are documented in
+[`docs/INDEPENDENT_EVAL_V1.md`](docs/INDEPENDENT_EVAL_V1.md).
 
 ## Evaluation gate
 

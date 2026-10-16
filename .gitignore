@@ -5,6 +5,7 @@ __pycache__/
 .venv/
 .DS_Store
 data/raw/
+data/eval/
 data/smoke.jsonl
 data/processed/*.jsonl
 data/pilot/
@@ -12,5 +13,6 @@ artifacts/adapters/
 artifacts/checkpoints/
 artifacts/router/*.joblib
 artifacts/predictions/
+artifacts/eval/
 wandb/
 kaggle/dataset/*.tar.gz

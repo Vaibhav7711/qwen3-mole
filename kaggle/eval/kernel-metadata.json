@@ -1,0 +1,17 @@
+{
+  "id": "bhabhihunter/qwen3-mole-independent-evaluation-set",
+  "title": "Qwen3 MoLE Independent Evaluation Set",
+  "code_file": "qwen3_mole_independent_eval.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_tpu": false,
+  "enable_internet": true,
+  "dataset_sources": [
+    "bhabhihunter/qwen3-mole-source"
+  ],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}

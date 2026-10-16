@@ -1,0 +1,69 @@
+version: 1
+seed: 20261016
+target_per_domain: 100
+candidate_pool_multiplier: 10
+
+# Similarity is character 3--5 gram TF-IDF cosine similarity against every
+# production-training prompt. Code and math deliberately use stricter gates
+# because the original training-data audit found transformed benchmark-like
+# prompts below the general 0.90 near-duplicate threshold.
+domains:
+  code:
+    max_train_similarity: 0.70
+  math:
+    max_train_similarity: 0.80
+  systems:
+    max_train_similarity: 0.90
+  instruction:
+    max_train_similarity: 0.90
+
+quality:
+  min_prompt_chars: 20
+  max_prompt_chars: 12000
+  min_reference_chars: 1
+  max_reference_chars: 30000
+
+sources:
+  - name: humaneval
+    domain: code
+    kind: humaneval
+    repository: openai/openai_humaneval
+    revision: 7dce6050a7d6d172f3cc5c32aa97f52fa1a2e544
+    config: openai_humaneval
+    split: test
+    license: mit
+    homepage: https://github.com/openai/human-eval
+    evaluation_method: execution
+
+  - name: gsm8k
+    domain: math
+    kind: gsm8k
+    repository: openai/gsm8k
+    revision: 740312add88f781978c0658806c59bc2815b9866
+    config: main
+    split: test
+    license: mit
+    homepage: https://github.com/openai/grade-school-math
+    evaluation_method: normalized_final_answer
+
+  - name: serverfault
+    domain: systems
+    kind: stackexchange
+    repository: HuggingFaceH4/stack-exchange-preferences
+    revision: c7bda74048748f55749cd663c3d8d1025a841fd9
+    data_file: data/serverfault.com/train-00000-of-00005.parquet
+    split: train
+    license: cc-by-sa-4.0
+    homepage: https://serverfault.com/
+    evaluation_method: blinded_judge
+
+  - name: ifeval
+    domain: instruction
+    kind: ifeval
+    repository: google/IFEval
+    revision: 966cd89545d6b6acfd7638bc708b98261ca58e84
+    config: default
+    split: train
+    license: apache-2.0
+    homepage: https://github.com/google-research/google-research/tree/master/instruction_following_eval
+    evaluation_method: deterministic_instruction_checks
