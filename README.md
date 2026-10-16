@@ -51,7 +51,7 @@ experiments, not unmeasured claims in the baseline.
 - [x] All four complete rank-16 adapter runs
 - [x] 2,048-example-per-domain production training run
 - [x] Near-duplicate and benchmark-contamination audit
-- [ ] Independent decontaminated evaluation suite (build running)
+- [x] Independent decontaminated 400-prompt evaluation suite
 - [x] Base-vs-expert-vs-routed quality and latency benchmark
 - [ ] Independent semantic answer-quality evaluation
 - [x] Optimized AWQ multi-LoRA serving benchmark
@@ -179,6 +179,8 @@ The gated post-v0.1.0 roadmap is in
 The independent 400-prompt evaluation builder and its stricter benchmark-
 derivative filters are documented in
 [`docs/INDEPENDENT_EVAL_V1.md`](docs/INDEPENDENT_EVAL_V1.md).
+The accepted builder-v3 manifest summary is in
+[`benchmarks/independent_eval_v1/summary.json`](benchmarks/independent_eval_v1/summary.json).
 
 The gated four-condition semantic generation and task-scoring harness is
 documented in [`docs/SEMANTIC_EVAL_V1.md`](docs/SEMANTIC_EVAL_V1.md).

@@ -1,7 +1,6 @@
 # Independent evaluation v1
 
-Status: **temporal code-benchmark correction implemented; production Kaggle
-verification pending**.
+Status: **accepted and production-verified on Kaggle**.
 
 This stage replaces same-source random test examples with a separately sourced,
 frozen evaluation suite. The suite contains 100 prompts in each expert domain:
@@ -61,3 +60,14 @@ The private Kaggle kernel is
 model-quality result: it only freezes and verifies the test set. Semantic
 generation and task-specific scoring begin only after builder version 3 passes
 its automated gates and the retained-prompt manual review.
+
+## Accepted build
+
+Kaggle kernel version 3 completed with 400 records and zero threshold
+violations. The independently rechecked output SHA-256 is
+`24fa0c9a4e493d7cf0fb624d0381ca2944b7229dedbb1c443874cf04f0a10449`.
+Maximum selected train similarities were 0.55684 for code, 0.48836 for math,
+0.43448 for systems, and 0.38336 for instruction following. The selected code
+problems span January 4 through April 6, 2025. The non-sensitive machine-readable
+result is retained in `benchmarks/independent_eval_v1/summary.json`; prompts,
+references, and private tests remain in the private hashed Kaggle artifact.

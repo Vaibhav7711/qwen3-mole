@@ -1,0 +1,41 @@
+{
+  "accepted": true,
+  "builder_version": 3,
+  "code_contest_date_range": [
+    "2025-01-04T00:00:00",
+    "2025-04-06T00:00:00"
+  ],
+  "domain_counts": {
+    "code": 100,
+    "instruction": 100,
+    "math": 100,
+    "systems": 100
+  },
+  "maximum_selected_similarity": {
+    "code": 0.55683774,
+    "instruction": 0.38335526,
+    "math": 0.4883635,
+    "systems": 0.43447769
+  },
+  "output_sha256": "24fa0c9a4e493d7cf0fb624d0381ca2944b7229dedbb1c443874cf04f0a10449",
+  "records": 400,
+  "rejected_predecessor": {
+    "builder_version": 2,
+    "reason": "Manual review found recognizable transformed HumanEval training derivatives below the automated similarity cutoff."
+  },
+  "source_revisions": {
+    "code": "livecodebench/code_generation_lite@0fe84c3912ea0c4d4a78037083943e8f0c4dd505:test6.jsonl",
+    "instruction": "google/IFEval@966cd89545d6b6acfd7638bc708b98261ca58e84",
+    "math": "openai/gsm8k@740312add88f781978c0658806c59bc2815b9866",
+    "systems": "HuggingFaceH4/stack-exchange-preferences@c7bda74048748f55749cd663c3d8d1025a841fd9"
+  },
+  "threshold_violations": 0,
+  "thresholds": {
+    "code": 0.8,
+    "instruction": 0.9,
+    "math": 0.8,
+    "systems": 0.9
+  },
+  "train_prompt_sha256": "ccb817a924f209968d50069c02d7c0c4c41e01092c9a4a0f2a23f7325798c8fb",
+  "train_records": 7376
+}
