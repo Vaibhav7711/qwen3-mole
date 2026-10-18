@@ -40,6 +40,7 @@ def judge_prompt(
 ) -> str:
     user = "\n\n".join(
         [
+            "EVALUATION INSTRUCTIONS:\n" + RUBRIC,
             "QUESTION:\n" + truncate_tokens(tokenizer, question, 1200),
             "REFERENCE:\n" + truncate_tokens(tokenizer, reference, 1600),
             "RESPONSE A:\n" + truncate_tokens(tokenizer, answer_a, 1800),
@@ -48,7 +49,7 @@ def judge_prompt(
         ]
     )
     return tokenizer.apply_chat_template(
-        [{"role": "system", "content": RUBRIC}, {"role": "user", "content": user}],
+        [{"role": "user", "content": user}],
         tokenize=False,
         add_generation_prompt=True,
     )

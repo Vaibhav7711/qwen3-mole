@@ -3,6 +3,7 @@ from pathlib import Path
 
 from qwen3_mole.judge_systems import (
     aggregate_bidirectional,
+    judge_prompt,
     load_comparisons,
     map_decision,
     parse_decision,
@@ -10,6 +11,25 @@ from qwen3_mole.judge_systems import (
     select_manual_review,
     summarize_judgments,
 )
+
+
+class UserOnlyTokenizer:
+    def encode(self, value, add_special_tokens=False):
+        return value.split()
+
+    def decode(self, values, skip_special_tokens=True):
+        return " ".join(values)
+
+    def apply_chat_template(self, messages, tokenize, add_generation_prompt):
+        assert [message["role"] for message in messages] == ["user"]
+        assert "EVALUATION INSTRUCTIONS" in messages[0]["content"]
+        return messages[0]["content"]
+
+
+def test_judge_prompt_supports_mistral_user_only_template() -> None:
+    prompt = judge_prompt(UserOnlyTokenizer(), "Question", "Reference", "First", "Second")
+    assert "RESPONSE A:\nFirst" in prompt
+    assert "RESPONSE B:\nSecond" in prompt
 
 
 def test_parse_and_map_decisions() -> None:
