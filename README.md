@@ -53,7 +53,7 @@ experiments, not unmeasured claims in the baseline.
 - [x] Near-duplicate and benchmark-contamination audit
 - [x] Independent decontaminated 400-prompt evaluation suite
 - [x] Base-vs-expert-vs-routed quality and latency benchmark
-- [ ] Independent semantic answer-quality evaluation
+- [x] Independent semantic answer-quality evaluation (Stage 2 did not pass)
 - [x] Optimized AWQ multi-LoRA serving benchmark
 
 The verified smoke result is documented in
@@ -185,6 +185,16 @@ The accepted builder-v3 manifest summary is in
 The gated four-condition semantic generation and task-scoring harness is
 documented in [`docs/SEMANTIC_EVAL_V1.md`](docs/SEMANTIC_EVAL_V1.md).
 
+The completed independent semantic benchmark is documented in
+[`docs/FINAL_INDEPENDENT_BENCHMARK.md`](docs/FINAL_INDEPENDENT_BENCHMARK.md).
+On the three automatically scored domains, routed accuracy was 41.0% versus
+68.7% for the untouched base model. The combined result, including eligible
+systems judgments, was a -0.339 routed-minus-base paired score difference with
+a 95% bootstrap interval of [-0.391, -0.287]. Stage 2 therefore failed, and
+the evidence does not support a larger training run using the current data,
+adapters, or router. Machine-readable results are in
+[`benchmarks/independent_semantic_v1/summary.json`](benchmarks/independent_semantic_v1/summary.json).
+
 ## Evaluation gate
 
 We do not call the experiment successful merely because loss falls. The final
@@ -197,8 +207,9 @@ benchmark must compare, on held-out prompts:
 
 Report task quality by domain, router accuracy and fallback rate, tokens per
 second, time to first token, peak GPU memory, and adapter-switch overhead.
-Use deterministic decoding for quality comparisons. Keep an untouched test set
-whose sources and near-duplicates were excluded from training.
+Use a frozen, model-appropriate sampling policy for quality comparisons. Keep
+an untouched test set whose sources and near-duplicates were excluded from
+training.
 
 ## Repository layout
 

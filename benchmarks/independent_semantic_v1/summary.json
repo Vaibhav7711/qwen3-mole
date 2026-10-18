@@ -1,0 +1,103 @@
+{
+  "accepted": true,
+  "benchmark": "independent_semantic_v1",
+  "status": "COMPLETE",
+  "stage2_passed": false,
+  "kernels": {
+    "generation": "bhabhihunter/qwen3-mole-semantic-generation",
+    "systems_judge": "bhabhihunter/qwen3-mole-systems-judge"
+  },
+  "inputs": {
+    "evaluation_records": 400,
+    "records_per_domain": 100,
+    "evaluation_sha256": "24fa0c9a4e493d7cf0fb624d0381ca2944b7229dedbb1c443874cf04f0a10449",
+    "model": "Qwen/Qwen3-8B-AWQ",
+    "model_revision": "4da05a8edb55c6046cce958586c33b61da07bb79"
+  },
+  "execution": {
+    "generation_records": 1600,
+    "task_score_records": 1200,
+    "systems_comparisons": 300,
+    "systems_judge_passes": 600,
+    "generation_seconds": 29955.6,
+    "systems_judge_seconds": 1167.4,
+    "all_exit_codes_zero": true
+  },
+  "task_accuracy": {
+    "base": {"code": 0.31, "math": 0.94, "instruction": 0.81, "overall": 0.6866666667},
+    "oracle": {"code": 0.23, "math": 0.52, "instruction": 0.37, "overall": 0.3733333333},
+    "routed": {"code": 0.22, "math": 0.55, "instruction": 0.46, "overall": 0.41},
+    "wrong": {"code": 0.14, "math": 0.63, "instruction": 0.71, "overall": 0.4933333333}
+  },
+  "automatic_paired_deltas": {
+    "routed_minus_base": {
+      "code": {"delta": -0.09, "ci95": [-0.15, -0.04]},
+      "math": {"delta": -0.39, "ci95": [-0.49, -0.29]},
+      "instruction": {"delta": -0.35, "ci95": [-0.45, -0.25]},
+      "overall": {"delta": -0.2766666667, "ci95": [-0.33, -0.2233333333]}
+    },
+    "routed_minus_oracle_overall": {"delta": 0.0366666667, "ci95": [0.0033333333, 0.07]},
+    "routed_minus_wrong_overall": {"delta": -0.0833333333, "ci95": [-0.1466666667, -0.02]}
+  },
+  "systems_judge": {
+    "model": "solidrust/Mistral-7B-Instruct-v0.3-AWQ",
+    "model_revision": "95b1295ddd1a8673117cdc7bd2a4da2a457bb3f7",
+    "routed_vs_base": {
+      "eligible": 48,
+      "excluded_invalid_or_inconsistent": 52,
+      "routed_wins": 0,
+      "ties": 13,
+      "base_wins": 35,
+      "routed_preference_score": 0.1354166667
+    },
+    "routed_vs_oracle": {
+      "eligible": 64,
+      "excluded_invalid_or_inconsistent": 36,
+      "routed_wins": 27,
+      "ties": 33,
+      "oracle_wins": 4,
+      "routed_preference_score": 0.6796875
+    },
+    "routed_vs_wrong": {
+      "eligible": 67,
+      "excluded_invalid_or_inconsistent": 33,
+      "routed_wins": 20,
+      "ties": 46,
+      "wrong_wins": 1,
+      "routed_preference_score": 0.6417910448
+    },
+    "excluded_overall": 121,
+    "exclusion_rate": 0.4033333333,
+    "human_review_items": 15,
+    "human_judge_agreement": null
+  },
+  "combined_paired_deltas": {
+    "routed_minus_base": {"examples": 348, "delta": -0.3390804598, "ci95": [-0.3908045977, -0.2873563218]},
+    "routed_minus_oracle": {"examples": 364, "delta": 0.0934065934, "ci95": [0.0549450549, 0.1346153846]},
+    "routed_minus_wrong": {"examples": 367, "delta": -0.0163487738, "ci95": [-0.0735694823, 0.0408719346]}
+  },
+  "router": {
+    "accuracy": 0.605,
+    "examples": 400,
+    "selections": {"base": 45, "code": 145, "instruction": 93, "math": 117, "systems": 0},
+    "systems_routes": {"base": 15, "code": 74, "instruction": 11, "math": 0, "systems": 0}
+  },
+  "generation_diagnostics": {
+    "finish_reasons": {"stop": 1416, "length": 184},
+    "base_code_length_limit_rate": 0.68,
+    "routed_code_length_limit_rate": 0.13
+  },
+  "exit_gates": {
+    "routed_beats_base_ci": false,
+    "routed_beats_wrong_ci": false,
+    "routed_close_to_oracle": true,
+    "no_material_domain_regression": false,
+    "human_judge_agreement": false
+  },
+  "limitations": [
+    "The systems judge excluded 40.3% of comparisons as invalid or order-inconsistent; systems statistics are secondary evidence.",
+    "Human annotation of the retained 15-item systems sample is incomplete, so no human/judge kappa is claimed.",
+    "Sixty-eight percent of base code generations reached the 8192-token output limit, although base still outscored routed code 31% to 22%.",
+    "Results apply to these adapters, data, routing policy, and frozen sampling configuration; they do not establish that MoLE is generally ineffective."
+  ]
+}

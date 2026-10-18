@@ -1,7 +1,6 @@
 # Independent semantic evaluation v1
 
-Status: **generation and task-scoring harness implemented; execution gated on
-the independent-set verification**.
+Status: **complete; Stage 2 failed**.
 
 The benchmark evaluates four conditions on the same frozen prompts:
 
@@ -68,8 +67,22 @@ seeing results, Stage 2 is defined to pass only if routed-minus-base and
 routed-minus-wrong 95% interval lower bounds are above zero, the overall routed
 point estimate is no more than 0.05 below oracle, no domain is more than 0.05
 below base, and human/judge Cohen's kappa is at least 0.60. Invalid or
-order-inconsistent judge decisions are excluded and counted. No outcome claim
-will be made until all five gates are resolved.
+order-inconsistent judge decisions are excluded and counted.
+
+The accepted final run produced 1,600 generations and 1,200 automatic task
+scores. Automatic accuracy was 68.7% for base, 37.3% for oracle, 41.0% for
+routed, and 49.3% for the wrong-expert control. Routed minus base was -0.277
+with a 95% paired interval of [-0.330, -0.223]. The corrected systems pass
+completed all 600 order-swapped judge calls; among 48 eligible routed/base
+comparisons, base won 35, 13 tied, and routed won none. The combined
+routed-minus-base difference was -0.339 with interval [-0.391, -0.287].
+
+The human/judge agreement gate is deliberately reported as unresolved: the
+15-item package has not been annotated by a human. This does not make the
+Stage 2 outcome ambiguous, because three independent required gates already
+failed: routed did not beat base, did not beat the wrong control, and had
+material domain regressions. The full result and limitations are in
+`docs/FINAL_INDEPENDENT_BENCHMARK.md`.
 
 The private dual-T4 kernel is
 `bhabhihunter/qwen3-mole-semantic-generation`. It consumes immutable outputs

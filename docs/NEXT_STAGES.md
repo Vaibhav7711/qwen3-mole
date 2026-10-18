@@ -1,5 +1,24 @@
 # Next stages after v0.1.0
 
+## Checkpoint outcome (2026-10-19)
+
+Stage 1 passed and Stage 2 completed but failed its quality gates. The routed
+system scored below the untouched base model on code, mathematics,
+instruction-following, and the eligible systems comparisons. Its combined
+routed-minus-base difference was -0.339 with a 95% paired bootstrap interval
+of [-0.391, -0.287]. The current four adapters must not be scaled to a larger
+training run: more steps on the same objective would be an unsupported use of
+compute.
+
+The next useful experiment is a new small pilot, not Stage 3 as originally
+written. Preserve the base model's general capability by lowering the adapter
+learning rate, mixing general replay examples into every expert, evaluating at
+frequent checkpoints, and selecting on independent semantic quality rather
+than teacher-forced loss. Replace the current router's in-domain classifier
+assumption with an out-of-distribution-aware fallback. Only resume the roadmap
+below if that pilot beats base with a positive paired confidence interval in at
+least one domain without a material regression elsewhere.
+
 The v0.1.0 checkpoint freezes a working four-expert Qwen3-8B MoLE system,
 production QLoRA training, held-out likelihood evaluation, routing, data audit,
 and optimized AWQ multi-LoRA inference. Future work should proceed through the
@@ -7,6 +26,10 @@ following gates in order. A later stage should not be used to hide a failure in
 an earlier one.
 
 ## Stage 1: independent evaluation set
+
+Status: **passed**. Builder v3 froze 400 independently sourced prompts (100 per
+domain), found no configured similarity-threshold violations, and recorded the
+manifest SHA-256. See `docs/INDEPENDENT_EVAL_V1.md`.
 
 Goal: replace the same-source random test split with a defensible independent
 evaluation set.
@@ -29,6 +52,12 @@ Exit criteria:
 - a versioned manifest makes the split exactly reproducible.
 
 ## Stage 2: semantic and task-specific quality
+
+Status: **failed**. Generation, automatic task scoring, and the order-swapped
+systems judge completed. Routed did not beat base or wrong-expert control and
+had material per-domain regressions. Human/judge agreement remains unclaimed,
+but cannot change the failed base, wrong-control, and domain-regression gates.
+See `docs/FINAL_INDEPENDENT_BENCHMARK.md`.
 
 Goal: establish whether lower answer NLL corresponds to better answers.
 
@@ -54,6 +83,8 @@ Exit criteria:
 
 ## Stage 3: router robustness and calibration
 
+Status: **blocked by Stage 2**, apart from small diagnostic pilots.
+
 Goal: make fallback behavior reliable outside the curated four-domain mix.
 
 Work:
@@ -72,6 +103,10 @@ Exit criteria:
 - router latency stays negligible relative to time to first token.
 
 ## Stage 4: production serving benchmark
+
+Status: **engineering baseline complete; further productization deferred**.
+The two-replica AWQ benchmark remains useful as a serving result, but semantic
+failure prevents it from being treated as a deployable quality improvement.
 
 Goal: convert the successful offline vLLM run into a service-level result.
 
@@ -93,6 +128,10 @@ Exit criteria:
 - the service survives adapter changes and single-replica failure cleanly.
 
 ## Stage 5: release and communication
+
+Status: **research checkpoint ready; adapter release deferred**. Publish the
+negative result and reproducible code, but do not advertise the current
+adapters as an improvement over Qwen3-8B.
 
 Goal: make the result independently usable and accurately presented.
 
