@@ -43,11 +43,16 @@ Task scoring is domain-specific:
 - IFEval uses Google's official strict checker pinned to the revision in
   `configs/semantic_eval.yaml`;
 - Server Fault responses go through a separate blinded pairwise judge pass
-  using a pinned Mistral-family GPTQ model. Each routed-versus-control pair is
+  using a pinned Mistral-family AWQ model. Each routed-versus-control pair is
   judged in both answer orders; disagreements are reported as inconsistent
   rather than forced into a win. A deterministic 15-item package is retained
   for manual review. `mole-review-agreement` refuses incomplete annotations
   and reports exact agreement plus Cohen's kappa.
+
+The first judge launch used a pinned GPTQ checkpoint whose dynamic activation
+ordering is no longer supported by vLLM 0.31. It failed before any judgments
+were generated. The replacement is an Apache-2.0 Mistral-7B-Instruct-v0.3 AWQ
+checkpoint with a standard static AWQ configuration, pinned by commit.
 
 The scorer reports per-condition accuracy and paired 10,000-sample bootstrap
 confidence intervals for routed minus base, oracle, and wrong-expert scores.

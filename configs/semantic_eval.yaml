@@ -60,10 +60,10 @@ stage2_exit:
   judge_kappa_min: 0.60
 
 systems_judge:
-  model: RedHatAI/Mistral-7B-Instruct-v0.3-quantized.w4a16
-  revision: aff481973dbd56b97c6538e06556fb5e3dab939e
+  model: solidrust/Mistral-7B-Instruct-v0.3-AWQ
+  revision: 95b1295ddd1a8673117cdc7bd2a4da2a457bb3f7
   license: apache-2.0
-  quantization: gptq
+  quantization: awq
   max_model_len: 8192
   max_num_seqs: 8
   max_new_tokens: 8
