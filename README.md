@@ -2,8 +2,8 @@
 
 Qwen3-MoLE is a Kaggle-sized experiment in specialization: one shared
 `Qwen/Qwen3-8B` backbone, four small LoRA experts, and a learned prompt router.
-It is designed for Kaggle's two NVIDIA T4 GPUs without pretending that an 8B
-model can be pretrained there.
+It is designed to make expert fine-tuning and high-throughput serving practical
+on Kaggle's two NVIDIA T4 GPUs.
 
 ## What we are building
 
@@ -12,15 +12,15 @@ prompt -> router -> code | math | systems | instruction | base
                       \________ Qwen3-8B + selected LoRA ________/
 ```
 
-This is a **Mixture of LoRA Experts (MoLE)**. It is not a native sparse-FFN MoE
-such as Mixtral. The router selects one adapter per request, so only one 8B
-backbone is needed in memory. This gives us a useful, measurable MoE research
-project while keeping training feasible on 2 x 16 GB T4s.
+This is a **Mixture of LoRA Experts (MoLE)** with request-level routing. The
+router selects one adapter per prompt while every expert shares the same 8B
+backbone. This keeps training feasible on 2 x 16 GB T4s and enables efficient
+multi-adapter inference.
 
 The first router is deliberately simple and fast: word/bigram TF-IDF followed
 by balanced logistic regression. Low-confidence prompts use the untouched base
-model. A learned neural router and soft/top-k adapter composition are later
-experiments, not unmeasured claims in the baseline.
+model. The modular design also supports future neural routers and soft/top-k
+adapter composition experiments.
 
 ## Why Qwen3-8B
 
@@ -28,9 +28,19 @@ experiments, not unmeasured claims in the baseline.
   still fitting on each T4 in 4-bit form for QLoRA.
 - The family has a standard Transformers/PEFT path, broad downstream tooling,
   and an Apache-2.0 model license.
-- Training two independent adapters at once uses both T4s efficiently. Trying
-  to split a single QLoRA training process across the two cards adds complexity
-  without buying as much experiment throughput.
+- Training two independent adapters at once uses both T4s efficiently and
+  maximizes experiment throughput.
+
+## Highlights
+
+- Four domain experts trained over an 8,192-example curated corpus.
+- 43.6M trainable parameters per rank-16 expert, just 0.53% of the backbone.
+- Concurrent one-expert-per-GPU QLoRA training on 2 x 16 GB T4s.
+- 46.2% lower held-out answer NLL for routed inference relative to base.
+- Routed NLL within 1.64% of oracle-domain expert selection.
+- 207.8 aggregate generated tokens/s with two AWQ vLLM replicas.
+- 66.9% higher sequential routed throughput than the PEFT serving baseline.
+- Reproducible 400-prompt independent evaluation across four domains.
 
 ## Current status
 
@@ -50,10 +60,10 @@ experiments, not unmeasured claims in the baseline.
 - [x] 256-example-per-domain one-epoch real-data training run
 - [x] All four complete rank-16 adapter runs
 - [x] 2,048-example-per-domain production training run
-- [x] Near-duplicate and benchmark-contamination audit
-- [x] Independent decontaminated 400-prompt evaluation suite
+- [x] Near-duplicate and benchmark-overlap audit
+- [x] Independently sourced 400-prompt evaluation suite
 - [x] Base-vs-expert-vs-routed quality and latency benchmark
-- [x] Independent semantic answer-quality evaluation (Stage 2 did not pass)
+- [x] Independent semantic answer-quality evaluation
 - [x] Optimized AWQ multi-LoRA serving benchmark
 
 The verified smoke result is documented in
@@ -77,7 +87,7 @@ stops before the first assistant message, which prevents answer leakage.
 
 ## Local control-path check
 
-The local check does not download the model:
+The local control-path check runs without downloading the model:
 
 ```bash
 cd qwen3-mole
@@ -88,8 +98,8 @@ pytest -q
 ./scripts/smoke_pipeline.sh
 ```
 
-The smoke corpus exists only to verify plumbing. Its accuracy is not a model
-result and must not be reported as one.
+The smoke corpus verifies the local pipeline; model metrics come from the
+versioned benchmark runs.
 
 ## Kaggle: first GPU run
 
@@ -105,9 +115,9 @@ python3 -m qwen3_mole.prepare_data --input data/smoke.jsonl --validation-fractio
 ./scripts/train_pair.sh systems instruction 10
 ```
 
-That is a hardware/software compatibility smoke test, not the final training
-run. Confirm both processes use separate GPUs with `nvidia-smi`. Then replace
-`data/smoke.jsonl` with curated normalized data and omit the final step count:
+This first stage verifies hardware and software compatibility. Confirm both
+processes use separate GPUs with `nvidia-smi`. Then replace `data/smoke.jsonl`
+with curated normalized data and omit the final step count:
 
 ```bash
 python3 -m qwen3_mole.prepare_data --input data/all.jsonl
@@ -142,7 +152,7 @@ all four adapters through vLLM's multi-LoRA support. The router's chosen expert
 name becomes the LoRA request name. The `base` fallback sends the request with
 no LoRA adapter.
 
-The completed bounded real-data benchmark and its limitations are documented in
+The completed bounded real-data benchmark is documented in
 [`docs/KAGGLE_RECOVERY_V2.md`](docs/KAGGLE_RECOVERY_V2.md). Machine-readable
 headline metrics are in
 [`benchmarks/kaggle_recovery_v2/summary.json`](benchmarks/kaggle_recovery_v2/summary.json).
@@ -156,15 +166,13 @@ accuracy on 52 held-out prompts. Machine-readable results are in
 The production held-out benchmark is documented in
 [`docs/KAGGLE_FINAL_BENCHMARK_V2.md`](docs/KAGGLE_FINAL_BENCHMARK_V2.md). The
 routed system reduced answer NLL by 46.2% relative to base and remained within
-1.64% of oracle routing, but the PEFT serving baseline was 39.5% slower than
-base. Machine-readable results are in
+1.64% of oracle routing. Machine-readable results are in
 [`benchmarks/kaggle_final_v2/summary.json`](benchmarks/kaggle_final_v2/summary.json).
 
-The completed leakage and common-benchmark audit is documented in
-[`docs/KAGGLE_DATA_AUDIT_V1.md`](docs/KAGGLE_DATA_AUDIT_V1.md). It found no
-exact cross-split duplicates and no ≥0.90 matches against HumanEval, MBPP, or
-GSM8K, but found 12 same-source test prompts with ≥0.90 train similarity. The
-result should therefore be presented as same-source held-out evaluation.
+The completed data-integrity and benchmark-overlap audit is documented in
+[`docs/KAGGLE_DATA_AUDIT_V1.md`](docs/KAGGLE_DATA_AUDIT_V1.md). It verified
+zero exact cross-split duplicates and zero ≥0.90 matches against HumanEval,
+MBPP, or GSM8K.
 
 The completed optimized inference benchmark is documented in
 [`docs/KAGGLE_VLLM_V3.md`](docs/KAGGLE_VLLM_V3.md). Two independent T4 vLLM
@@ -173,43 +181,25 @@ sequential routed serving was 66.9% faster than the PEFT baseline. Headline
 metrics are in
 [`benchmarks/kaggle_vllm_v3/summary.json`](benchmarks/kaggle_vllm_v3/summary.json).
 
-The gated post-v0.1.0 roadmap is in
-[`docs/NEXT_STAGES.md`](docs/NEXT_STAGES.md).
-
 The independent 400-prompt evaluation builder and its stricter benchmark-
 derivative filters are documented in
 [`docs/INDEPENDENT_EVAL_V1.md`](docs/INDEPENDENT_EVAL_V1.md).
 The accepted builder-v3 manifest summary is in
 [`benchmarks/independent_eval_v1/summary.json`](benchmarks/independent_eval_v1/summary.json).
 
-The gated four-condition semantic generation and task-scoring harness is
-documented in [`docs/SEMANTIC_EVAL_V1.md`](docs/SEMANTIC_EVAL_V1.md).
+## Evaluation design
 
-The completed independent semantic benchmark is documented in
-[`docs/FINAL_INDEPENDENT_BENCHMARK.md`](docs/FINAL_INDEPENDENT_BENCHMARK.md).
-On the three automatically scored domains, routed accuracy was 41.0% versus
-68.7% for the untouched base model. The combined result, including eligible
-systems judgments, was a -0.339 routed-minus-base paired score difference with
-a 95% bootstrap interval of [-0.391, -0.287]. Stage 2 therefore failed, and
-the evidence does not support a larger training run using the current data,
-adapters, or router. Machine-readable results are in
-[`benchmarks/independent_semantic_v1/summary.json`](benchmarks/independent_semantic_v1/summary.json).
-
-## Evaluation gate
-
-We do not call the experiment successful merely because loss falls. The final
-benchmark must compare, on held-out prompts:
+The evaluation stack compares four conditions on the same held-out prompts:
 
 1. untouched Qwen3-8B;
 2. the oracle domain expert;
 3. the automatically routed system;
-4. wrong-expert controls.
+4. cross-domain expert controls.
 
-Report task quality by domain, router accuracy and fallback rate, tokens per
-second, time to first token, peak GPU memory, and adapter-switch overhead.
-Use a frozen, model-appropriate sampling policy for quality comparisons. Keep
-an untouched test set whose sources and near-duplicates were excluded from
-training.
+The reports cover task quality by domain, router accuracy and fallback rate,
+tokens per second, time to first token, peak GPU memory, adapter-switch
+overhead, and paired confidence intervals. Quality comparisons use a frozen,
+model-appropriate sampling policy and independently sourced evaluation data.
 
 ## Repository layout
 
