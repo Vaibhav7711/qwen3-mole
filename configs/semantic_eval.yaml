@@ -66,4 +66,4 @@ systems_judge:
   quantization: awq
   max_model_len: 8192
   max_num_seqs: 8
-  max_new_tokens: 8
+  max_new_tokens: 256

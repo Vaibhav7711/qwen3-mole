@@ -103,6 +103,7 @@ save()
 if any(exit_codes.values()):
     raise SystemExit(max(exit_codes.values()))
 
+sys.path.insert(0, str(WORK_ROOT / "src"))
 from qwen3_mole.judge_systems import load_comparisons, select_manual_review, summarize_judgments
 
 judgments = []

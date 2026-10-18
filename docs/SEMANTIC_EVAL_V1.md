@@ -53,6 +53,12 @@ The first judge launch used a pinned GPTQ checkpoint whose dynamic activation
 ordering is no longer supported by vLLM 0.31. It failed before any judgments
 were generated. The replacement is an Apache-2.0 Mistral-7B-Instruct-v0.3 AWQ
 checkpoint with a standard static AWQ configuration, pinned by commit.
+The first completed AWQ pass allowed only eight output tokens and asked for an
+immediate A/B/TIE label. It was rejected by the predeclared order check: 241 of
+300 comparisons changed mapped winner when response order was reversed. The
+final pass gives the judge 256 tokens to assess both answers independently,
+requires an explicit terminal `FINAL:` line, and excludes invalid or
+order-inconsistent comparisons from preference statistics.
 
 The scorer reports per-condition accuracy and paired 10,000-sample bootstrap
 confidence intervals for routed minus base, oracle, and wrong-expert scores.

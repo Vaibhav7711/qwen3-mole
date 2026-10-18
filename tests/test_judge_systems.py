@@ -34,9 +34,10 @@ def test_judge_prompt_supports_mistral_user_only_template() -> None:
 
 def test_parse_and_map_decisions() -> None:
     assert parse_decision("A") == "A"
-    assert parse_decision("Decision: tie") == "TIE"
+    assert parse_decision("Analysis mentions A and B.\nFINAL: TIE") == "TIE"
+    assert parse_decision("B\nExplanation with a trailing article a") == "B"
     assert parse_decision("I refuse") == "INVALID"
-    assert parse_decision("A is weaker, so B") == "B"
+    assert parse_decision("Analysis only: A is weaker, so B") == "INVALID"
     assert map_decision("B", "routed", "base") == "base"
     assert map_decision("TIE", "routed", "base") == "tie"
 
@@ -85,7 +86,24 @@ def test_summarize_judgments_reports_routed_preference() -> None:
         )
     summary = summarize_judgments(results, 42)
     assert summary["base"]["routed_preference_score"] == 0.625
+    assert summary["base"]["eligible_comparisons"] == 4
     assert summary["wrong"]["outcomes"] == {"routed": 2, "tie": 1, "wrong": 1}
+
+
+def test_summary_excludes_inconsistent_and_invalid_results() -> None:
+    results = []
+    for other in ("base", "oracle", "wrong"):
+        results.extend(
+            [
+                {"other": other, "winner": "routed"},
+                {"other": other, "winner": "inconsistent"},
+                {"other": other, "winner": "invalid"},
+            ]
+        )
+    summary = summarize_judgments(results, 42)
+    assert summary["base"]["eligible_comparisons"] == 1
+    assert summary["base"]["excluded_invalid_or_inconsistent"] == 2
+    assert summary["base"]["routed_preference_score"] == 1.0
 
 
 def test_manual_review_sample_covers_strata() -> None:

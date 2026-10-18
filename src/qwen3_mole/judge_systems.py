@@ -14,11 +14,14 @@ from .score_semantic import paired_bootstrap, strip_thinking
 
 
 OTHER_CONDITIONS = ("base", "oracle", "wrong")
-DECISION = re.compile(r"\b(TIE|A|B)\b", flags=re.IGNORECASE)
+FINAL_DECISION = re.compile(r"FINAL\s*:\s*(TIE|A|B)\b", flags=re.IGNORECASE)
+LEADING_DECISION = re.compile(r"^\s*(TIE|A|B)\b", flags=re.IGNORECASE)
 RUBRIC = """You are an impartial evaluator of answers to systems-administration questions.
 Use the reference answer as evidence, but correct alternatives are allowed. Prefer technical
 correctness, operational safety, relevance, and completeness. Ignore verbosity and superficial
-style. Choose the better response. Output exactly A, B, or TIE and nothing else."""
+style. Do not favor the first or second response because of its position. Assess Response A and
+Response B independently against the question and reference, then compare them. End with exactly
+one final line in the form FINAL: A, FINAL: B, or FINAL: TIE. Put nothing after that line."""
 
 
 def stable_reverse(identifier: str, other: str, seed: int) -> bool:
@@ -56,8 +59,11 @@ def judge_prompt(
 
 
 def parse_decision(value: str) -> str:
-    matches = DECISION.findall(value.strip())
-    return matches[-1].upper() if matches else "INVALID"
+    matches = FINAL_DECISION.findall(value)
+    if matches:
+        return matches[-1].upper()
+    leading = LEADING_DECISION.search(value)
+    return leading.group(1).upper() if leading else "INVALID"
 
 
 def map_decision(decision: str, answer_a: str, answer_b: str) -> str:
@@ -121,7 +127,18 @@ def summarize_judgments(results: list[dict[str, Any]], seed: int) -> dict[str, A
         for result in values:
             winner = result["winner"]
             counts[winner] += 1
-            preferences.append(1.0 if winner == "routed" else 0.0 if winner == other else 0.5)
+            if winner in {"routed", other, "tie"}:
+                preferences.append(1.0 if winner == "routed" else 0.0 if winner == other else 0.5)
+        if not preferences:
+            summary[other] = {
+                "comparisons": len(values),
+                "eligible_comparisons": 0,
+                "excluded_invalid_or_inconsistent": len(values),
+                "outcomes": dict(sorted(counts.items())),
+                "routed_preference_score": None,
+                "routed_preference_minus_chance": None,
+            }
+            continue
         interval = paired_bootstrap(
             preferences,
             [0.5] * len(preferences),
@@ -129,6 +146,8 @@ def summarize_judgments(results: list[dict[str, Any]], seed: int) -> dict[str, A
         )
         summary[other] = {
             "comparisons": len(values),
+            "eligible_comparisons": len(preferences),
+            "excluded_invalid_or_inconsistent": len(values) - len(preferences),
             "outcomes": dict(sorted(counts.items())),
             "routed_preference_score": sum(preferences) / len(preferences),
             "routed_preference_minus_chance": interval,
